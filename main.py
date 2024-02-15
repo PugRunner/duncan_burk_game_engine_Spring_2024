@@ -39,6 +39,7 @@ class Game():
         print("create new game...")
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
+        self.coins = pg.sprite.Group()
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):d
         #     Wall(self, x, 5)
@@ -51,6 +52,9 @@ class Game():
                     Wall(self, col, row)
                 if tile == 'P':
                     self.player1 = Player(self, col, row)
+                if tile == 'C':
+                    print("a coin at", row, col)
+                    Coin(self, col, row)
     # def run
     def run(self):
     # game lopp
