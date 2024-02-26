@@ -53,7 +53,6 @@ class Game():
                 if tile == 'P':
                     self.player1 = Player(self, col, row)
                 if tile == 'C':
-                    print("a coin at", row, col)
                     Coin(self, col, row)
     # def run
     def run(self):
@@ -71,18 +70,24 @@ class Game():
 
     # Draws lines to form a grid
     def draw_grid(self):
-        # for x in range(0, WIDTH, TILESIZE):
-        #     pg.draw.line(self.screen, LIGHTGREY,(x, 0), (x, HEIGHT))
-        # for y in range(0, WIDTH, TILESIZE):
-        #     pg.draw.line(self.screen, LIGHTGREY,(0, y), (WIDTH, y))
+        #  for x in range(0, WIDTH, TILESIZE):
+        #       pg.draw.line(self.screen, LIGHTGREY, (x, 0), (x, HEIGHT))
+        #  for y in range(0, HEIGHT, TILESIZE):
+        #       pg.draw.line(self.screen, LIGHTGREY, (0, y), (WIDTH, y))
         pass
-
-    # Makes a screen
+    def draw_text(self, surface, text, size, color, x, y):
+        font_name = pg.font.match_font('arial')
+        font = pg.font.Font(font_name, size)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect()
+        text_rect.topleft = (x*TILESIZE,y*TILESIZE)
+        surface.blit(text_surface, text_rect)
     def draw(self):
-        self.screen.fill(BGCOLOR)
-        self.draw_grid()
-        self.all_sprites.draw(self.screen)
-        pg.display.flip()
+            self.screen.fill(BGCOLOR)
+            self.draw_grid()
+            self.all_sprites.draw(self.screen)
+            self.draw_text(self.screen, str(self.player1.moneybag), 64, WHITE, 1, 1)
+            pg.display.flip()
 
     # Lets you do events of movement/quiting
         # dx+1 is down

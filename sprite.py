@@ -10,13 +10,14 @@ class Player(pg.sprite.Sprite):
         # init super class
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
+        global PlayerSize
+        PlayerSize = self.image = pg.Surface((TILESIZE, TILESIZE))
         self.image.fill(GREEN)
         self.rect = self.image.get_rect()
         self.vx, self.vy = 0, 0
         self.x = x * TILESIZE
         self.y = y * TILESIZE
-        self.gold = 0
+        self.moneybag = 0
     
     # def key presses for movement and player speed
     def get_keys(self):
@@ -69,10 +70,21 @@ class Player(pg.sprite.Sprite):
                 self.rect.y = self.y
                 
     def collide_with_group(self, group, kill):
-            hits = pg.sprite.spritecollide(self, group, kill)
-            if hits:
-                return True
+        hits = pg.sprite.spritecollide(self, group, kill)
+        if hits:
+            if str(hits[0].__class__.__name__) == "Coin":
+                self.moneybag += 1
+            
+    def update(self):
+            self.get_keys()
+            self.rect.y = self.y
+            # collision 
+            self.collide_with_walls('y')
+            self.collide_with_group(self.game.coins, True)
 
+            # coin_hits = pg.sprite.spritecollide(self.game.coins, True)
+            # if coin_hits:
+            #     print("I got a coin")
 
     
     # def player size
@@ -81,15 +93,14 @@ class Player(pg.sprite.Sprite):
         self.x += self.vx * self.game.dt
         self.y += self.vy * self.game.dt
         self.rect.x = self.x
-        #add collision later 
+        #collision
+        # walls 
         self.collide_with_walls('x')
         self.rect.y = self.y  
-        #add collision later
-        self.collide_with_walls('y') 
-        #add collision later 
+        self.collide_with_walls('y')  
+        # gold coins
         if self.collide_with_group(self.game.coins, True):
             self.gold += 1
-
 
 # def wall class
 class Wall(pg.sprite.Sprite):
@@ -118,5 +129,6 @@ class Coin(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
+
         
 
