@@ -18,6 +18,8 @@ class Player(pg.sprite.Sprite):
             self.x = x * TILESIZE
             self.y = y * TILESIZE
             self.moneybag = 0
+            self.spedd = 300
+            self.hitpoints = 100
     
     # def key presses for movement and player speed
     def get_keys(self):
