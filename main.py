@@ -40,6 +40,10 @@ class Game():
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
+        self.power_ups = pg.sprite.Group()
+        self.fake_walls = pg.sprite.Group()
+        self.teleports = pg.sprite.Group()
+        self.dones = pg.sprite.Group()
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):d
         #     Wall(self, x, 5)
@@ -54,6 +58,14 @@ class Game():
                     self.player1 = Player(self, col, row)
                 if tile == 'C':
                     Coin(self, col, row)
+                if tile == 'p':
+                    PowerUp(self, col, row)
+                if tile == 'F':
+                    FakeWall(self, col, row)
+                if tile == 't':
+                    Teleport(self, col, row)
+                if tile == 'd':
+                    Done(self, col, row)
     # def run
     def run(self):
     # game lopp
