@@ -4,9 +4,9 @@
 
 '''
 
-moving enemies
-killing enemies
-players and enemies can shot
+player has a shield
+killing players
+walls can shot
 
 '''
 
@@ -48,6 +48,8 @@ class Game():
         print("create new game...")
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
+        self.swalls = pg.sprite.Group()
+        self.nwalls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
         self.fake_walls = pg.sprite.Group()
@@ -63,6 +65,10 @@ class Game():
                 if tile == '1':
                     print("a wall at", row, col)
                     Wall(self, col, row)
+                if tile == '2':
+                    SWall(self, col, row)
+                if tile == '3':
+                    NWall(self, col, row)
                 if tile == 'P':
                     self.player1 = Player(self, col, row)
                 if tile == 'C':
