@@ -1,6 +1,15 @@
 # This filed created by: Duncan Burk
 # Github is now listening
 # Imports pygame as pg and imports settings code
+
+'''
+
+moving enemies
+killing enemies
+players and enemies can shot
+
+'''
+
 import pygame as pg 
 from settings import *
 from sprite import *
