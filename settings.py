@@ -19,6 +19,7 @@ YELLOW = (255, 255, 0)
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
+DARKRED = (150, 0, 0)
 
 # PLayer Settings
 PLAYER_SPEED = 300
