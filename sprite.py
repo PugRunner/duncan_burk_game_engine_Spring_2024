@@ -18,20 +18,20 @@ class Player(pg.sprite.Sprite):
             self.x = x * TILESIZE
             self.y = y * TILESIZE
             self.moneybag = 0
-            self.spedd = 300
+            self.speed = 300
             self.hitpoints = 100
     
     # def key presses for movement and player speed
     def get_keys(self):
         self.vx, self.vy = 0, 0
         keys = pg.key.get_pressed()
-        if keys[pg.K_LEFT] or keys[pg.K_a]:
+        if keys[pg.K_LEFT]:
             self.vx = -PLAYER_SPEED  
-        if keys[pg.K_RIGHT] or keys[pg.K_d]:
+        if keys[pg.K_RIGHT]:
             self.vx = PLAYER_SPEED  
-        if keys[pg.K_UP] or keys[pg.K_w]:
+        if keys[pg.K_UP]:
             self.vy = -PLAYER_SPEED  
-        if keys[pg.K_DOWN] or keys[pg.K_s]:
+        if keys[pg.K_DOWN]:
             self.vy = PLAYER_SPEED
         # make dialong speed slower
         if self.vx != 0 and self.vy != 0:
@@ -70,6 +70,80 @@ class Player(pg.sprite.Sprite):
                     self.y = hits[0].rect.bottom
                 self.vy = 0
                 self.rect.y = self.y
+        
+    def collide_with_group(self, group, kill):
+        hits = pg.sprite.spritecollide(self, group, kill)
+        if hits:
+            if str(hits[0].__class__.__name__) == "Coin":
+                self.moneybag += 1
+            if str(hits[0].__class__.__name__) == "Done":
+                self.quit()
+            if str(hits[0].__class__.__name__) == "Bullet":
+                self.quit()
+            if str(hits[0].__class__.__name__) == "PowerUp":
+                    global PlayerSize 
+                    PlayerSize = self.image = pg.Surface((BIGTILESIZE, BIGTILESIZE))
+                    self.image.fill(GREEN)
+                    self.rect = self.image.get_rect()
+                    # self.vx, self.vy = 0, 0
+                    # self.x * BIGTILESIZE
+                    # self.y * BIGTILESIZE
+            if str(hits[0].__class__.__name__) == "Teleport":
+                    self.x =525
+                    self.y =50
+
+# defines plapyer class
+class Shield(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+            self.groups = game.all_sprites
+            # init super class
+            pg.sprite.Sprite.__init__(self, self.groups)
+            self.game = game
+            global ShieldSize
+            ShieldSize = self.image = pg.Surface((SHEILDX, SHEILDY))
+            self.image.fill(BLUE)
+            self.rect = self.image.get_rect()
+            self.vx, self.vy = 0, 0
+            self.x = x * SHEILDX
+            self.y = y * SHEILDY
+
+    # def key presses for movement and player speed
+    def get_keys(self):
+        self.vx, self.vy = 0, 0
+        keys = pg.key.get_pressed()
+        if keys[pg.K_LEFT]:
+            self.vx = -PLAYER_SPEED  
+        if keys[pg.K_RIGHT]:
+            self.vx = PLAYER_SPEED  
+        if keys[pg.K_UP]:
+            self.vy = -PLAYER_SPEED  
+        if keys[pg.K_DOWN]:
+            self.vy = PLAYER_SPEED
+        # make dialong speed slower
+        if self.vx != 0 and self.vy != 0:
+            self.vx *= 0.7071
+            self.vy *= 0.7071
+
+        # Def new collision, hit box in top right
+    def collide_with_walls(self, dir):
+        if dir == 'x':
+            hits = pg.sprite.spritecollide(self, self.game.walls, False)
+            if hits:
+                if self.vx > 0:
+                    self.x = hits[0].rect.left - self.rect.width
+                if self.vx < 0:
+                    self.x = hits[0].rect.right
+                self.vx = 0
+                self.rect.x = self.x
+        if dir == 'y':
+            hits = pg.sprite.spritecollide(self, self.game.walls, False)
+            if hits:
+                if self.vy > 0:
+                    self.y = hits[0].rect.top - self.rect.height
+                if self.vy < 0:
+                    self.y = hits[0].rect.bottom
+                self.vy = 0
+                self.rect.y = self.y
                 
     def collide_with_group(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
@@ -78,9 +152,11 @@ class Player(pg.sprite.Sprite):
                 self.moneybag += 1
             if str(hits[0].__class__.__name__) == "Done":
                 self.quit()
+            if str(hits[0].__class__.__name__) == "Bullet":
+                self.quit()
             if str(hits[0].__class__.__name__) == "PowerUp":
                     global PlayerSize 
-                    PlayerSize = self.image = pg.Surface((BIGTILESIZE, BIGTILESIZE))
+                    PlayerSize = self.image = pg.Surface((SHEILDX, BIGTILESIZE))
                     self.image.fill(GREEN)
                     self.rect = self.image.get_rect()
                     # self.vx, self.vy = 0, 0
@@ -121,6 +197,9 @@ class Player(pg.sprite.Sprite):
         if self.collide_with_group(self.game.dones, True):
             # quits game
             self.quit()
+        if self.collide_with_group(self.game.bullets, True):
+            # quits game
+            self.quit()
         if self.collide_with_group(self.game.teleports, True):
             # moves player to 525, 50
             self.x =525
@@ -144,6 +223,19 @@ class Player(pg.sprite.Sprite):
 class Wall(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.walls
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(BLUE)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+
+class Bullet(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.bullets
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
