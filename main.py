@@ -3,9 +3,9 @@
 # Imports pygame as pg and imports settings code
 
 '''
-moving enemies
-killing enemies
-players and enemies can shot
+change player
+projectiles
+killing player
 '''
 
 import pygame as pg 
@@ -48,7 +48,8 @@ class Game():
         self.fake_walls = pg.sprite.Group()
         self.teleports = pg.sprite.Group()
         self.dones = pg.sprite.Group()
-        # self.player1 = Player(self, 1, 1)
+        self.pewpew = pg.sprite.Group()
+        # self.player1 = Player(self)
         # for x in range(10, 20):d
         #     Wall(self, x, 5)
         for row, tiles in enumerate(self.map_data):
@@ -58,9 +59,9 @@ class Game():
                 if tile == '1':
                     print("a wall at", row, col)
                     Wall(self, col, row)
-                if tile == 'P':
-                    print("A player at", row, col)
-                    self.player1 = Player(self, col, row)
+                # if tile == 'P':
+                #     print("A player at", row, col)
+                #     self.player1 = Player(self, col, row)
                 if tile == 'C':
                     Coin(self, col, row)
                 if tile == 's':
@@ -73,6 +74,8 @@ class Game():
                     Teleport(self, col, row)
                 if tile == 'd':
                     Done(self, col, row)
+                if tile == "w":
+                    PewPew(self, col, row)
     # def run
     def run(self):
     # game lopp
@@ -99,11 +102,12 @@ class Game():
         text_rect = text_surface.get_rect()
         text_rect.topleft = (x*TILESIZE,y*TILESIZE)
         surface.blit(text_surface, text_rect)
+
     def draw(self):
             self.screen.fill(BGCOLOR)
             self.draw_grid()
             self.all_sprites.draw(self.screen)
-            self.draw_text(self.screen, str(self.player1.moneybag), 64, WHITE, 1, 1)
+            # self.draw_text(self.screen, str(self.player1.moneybag), 64, WHITE, 1, 1)
             pg.display.flip()
     # Lets you do events of movement/quiting
         # dx+1 is down

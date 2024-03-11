@@ -27,4 +27,4 @@ DARKRED = (150, 0, 0)
 WHITE = (255, 255, 255)
 
 # PLayer Settings
-PLAYER_SPEED = 300
+PLAYER_SPEED = 200
