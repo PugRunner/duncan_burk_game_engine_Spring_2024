@@ -2,6 +2,7 @@
 # This code was inspired by Zelda and informed by Chris Bradfield
 import pygame as pg
 from settings import *
+from random import randint
 
 # defines plapyer class
 # class Player(pg.sprite.Sprite):
@@ -146,7 +147,7 @@ class Sheild(pg.sprite.Sprite):
         # Def new collision, hit box in top right
     def collide_with_walls(self, dir):
         if dir == 'x':
-            hits = pg.sprite.spritecollide(self, self.game.walls, False)
+            hits = pg.sprite.spritecollide(self, self.game.wallsn or self.game.wallss, False)
             if hits:
                 if self.vx > 0:
                     self.x = hits[0].rect.left - self.rect.width
@@ -155,7 +156,7 @@ class Sheild(pg.sprite.Sprite):
                 self.vx = 0
                 self.rect.x = self.x
         if dir == 'y':
-            hits = pg.sprite.spritecollide(self, self.game.walls, False)
+            hits = pg.sprite.spritecollide(self, self.game.wallsn or self.game.wallss, False)
             if hits:
                 if self.vy > 0:
                     self.y = hits[0].rect.top - self.rect.height
@@ -237,9 +238,22 @@ class Sheild(pg.sprite.Sprite):
 
 
 # def wall class
-class Wall(pg.sprite.Sprite):
+class WallN(pg.sprite.Sprite):
     def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.walls
+        self.groups = game.all_sprites, game.wallsn
+        pg.sprite.Sprite.__init__(self, self.groups)
+        self.game = game
+        self.image = pg.Surface((TILESIZE, TILESIZE))
+        self.image.fill(BLUE)
+        self.rect = self.image.get_rect()
+        self.x = x
+        self.y = y
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+
+class WallS(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        self.groups = game.all_sprites, game.wallss
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
@@ -316,22 +330,4 @@ class PowerUp(pg.sprite.Sprite):
         self.y = y
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
-
-class PewPew(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.pewpew
-        pg.sprite.Sprite.__init__(self, self.groups)
-        self.game = game
-        self.image = pg.Surface((TILESIZE/4, TILESIZE/4))
-        self.image.fill(RED)
-        self.rect = self.image.get_rect()
-        self.x = x
-        self.y = y
-        self.rect.x = x*TILESIZE
-        self.rect.y = y*TILESIZE
-        self.speed = 10*TILESIZE
-        print("I created a pew pew...")
-    def collide_with_group(self, group, kill):
-        hits = pg.sprite.spritecollide(self, group, kill)
-
     

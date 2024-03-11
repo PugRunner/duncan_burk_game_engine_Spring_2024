@@ -13,6 +13,7 @@ from settings import *
 from sprite import *
 from random import randint
 from os import path
+from math import floor
 # created object class of game
 class Game():
    # Define a special method to init the properties of said class...
@@ -42,13 +43,14 @@ class Game():
     def new(self):
         print("create new game...")
         self.all_sprites = pg.sprite.Group()
-        self.walls = pg.sprite.Group()
+        self.wallsn = pg.sprite.Group()
+        self.wallss = pg.sprite.Group()
         self.coins = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
         self.fake_walls = pg.sprite.Group()
         self.teleports = pg.sprite.Group()
         self.dones = pg.sprite.Group()
-        self.pewpew = pg.sprite.Group()
+        self.mobs = pg.sprite.Group()
         # self.player1 = Player(self)
         # for x in range(10, 20):d
         #     Wall(self, x, 5)
@@ -58,7 +60,10 @@ class Game():
                 print(col)
                 if tile == '1':
                     print("a wall at", row, col)
-                    Wall(self, col, row)
+                    WallN(self, col, row)
+                if tile == '2':
+                    print("a wall at", row, col)
+                    WallN(self, col, row)
                 # if tile == 'P':
                 #     print("A player at", row, col)
                 #     self.player1 = Player(self, col, row)
@@ -74,8 +79,6 @@ class Game():
                     Teleport(self, col, row)
                 if tile == 'd':
                     Done(self, col, row)
-                if tile == "w":
-                    PewPew(self, col, row)
     # def run
     def run(self):
     # game lopp
@@ -88,6 +91,7 @@ class Game():
     # Lets you quit
     def update(self):
         self.all_sprites.update()
+        
     # Draws lines to form a grid
     def draw_grid(self):
         #  for x in range(0, WIDTH, TILESIZE):
@@ -109,6 +113,22 @@ class Game():
             self.all_sprites.draw(self.screen)
             # self.draw_text(self.screen, str(self.player1.moneybag), 64, WHITE, 1, 1)
             pg.display.flip()
+    def show_start_screen(self):
+            self.screen.fill(BGCOLOR)
+            self.draw_text(self.screen, "This is the start screen", 24, WHITE, WIDTH/2 - 32, 2)
+            pg.display.flip()
+            self.wait_for_key()
+
+    def wait_for_key(self):
+        waiting = True
+        while waiting:
+            self.clock.tick(FPS)
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    waiting = False
+                    self.quit()
+                if event.type == pg.KEYUP:
+                    waiting = False
     # Lets you do events of movement/quiting
         # dx+1 is down
         # dx-1 is up
@@ -131,7 +151,7 @@ class Game():
 # def g as game
 g = Game()
 # use run method to start things
-# g.show_start_screen()
+g.show_start_screen()
 while True:
     g.new()
     g.run()
