@@ -3,11 +3,9 @@
 # Imports pygame as pg and imports settings code
 
 '''
-
-player has a shield
-killing players
-walls can shot
-
+moving enemies
+killing enemies
+players and enemies can shot
 '''
 
 import pygame as pg 
@@ -15,8 +13,6 @@ from settings import *
 from sprite import *
 from random import randint
 from os import path
-
-
 # created object class of game
 class Game():
    # Define a special method to init the properties of said class...
@@ -42,22 +38,16 @@ class Game():
             for line in f:
                 print(line)
                 self.map_data.append(line)
-
     # Create run method which runs the whole GAME
     def new(self):
         print("create new game...")
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
-        self.swalls = pg.sprite.Group()
-        self.nwalls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
-        # self.fake_walls = pg.sprite.Group()
-        # self.teleports = pg.sprite.Group()
+        self.fake_walls = pg.sprite.Group()
+        self.teleports = pg.sprite.Group()
         self.dones = pg.sprite.Group()
-        self.bullets = pg.sprite.Group()
-        # self.player = pg.sprite.Group()
-        # self.shield = pg.sprite.Group()
         # self.player1 = Player(self, 1, 1)
         # for x in range(10, 20):d
         #     Wall(self, x, 5)
@@ -66,23 +56,21 @@ class Game():
             for col, tile in enumerate(tiles):
                 print(col)
                 if tile == '1':
+                    print("a wall at", row, col)
                     Wall(self, col, row)
-                if tile == '2':
-                    SWall(self, col, row)
-                if tile == '3':
-                    NWall(self, col, row)
                 if tile == 'P':
+                    print("A player at", row, col)
                     self.player1 = Player(self, col, row)
-                if tile == 's':
-                    Shield(self, col, row)
                 if tile == 'C':
                     Coin(self, col, row)
+                if tile == 's':
+                    Sheild(self, col, row)
                 if tile == 'p':
                     PowerUp(self, col, row)
-                # if tile == 'F':
-                #     FakeWall(self, col, row)
-                # if tile == 't':
-                #     Teleport(self, col, row)
+                if tile == 'F':
+                    FakeWall(self, col, row)
+                if tile == 't':
+                    Teleport(self, col, row)
                 if tile == 'd':
                     Done(self, col, row)
     # def run
@@ -94,11 +82,9 @@ class Game():
             self.events()
             self.update()
             self.draw()
-
     # Lets you quit
     def update(self):
         self.all_sprites.update()
-
     # Draws lines to form a grid
     def draw_grid(self):
         #  for x in range(0, WIDTH, TILESIZE):
@@ -111,16 +97,14 @@ class Game():
         font = pg.font.Font(font_name, size)
         text_surface = font.render(text, True, color)
         text_rect = text_surface.get_rect()
-        text_rect.topleft = (x,y)
+        text_rect.topleft = (x*TILESIZE,y*TILESIZE)
         surface.blit(text_surface, text_rect)
-    
     def draw(self):
             self.screen.fill(BGCOLOR)
             self.draw_grid()
             self.all_sprites.draw(self.screen)
             self.draw_text(self.screen, str(self.player1.moneybag), 64, WHITE, 1, 1)
             pg.display.flip()
-
     # Lets you do events of movement/quiting
         # dx+1 is down
         # dx-1 is up
@@ -140,30 +124,10 @@ class Game():
             # if event.type == pg.KEYDOWN:
             #     if event.key == pg.K_w:
             #         self.player1.move(dy=-1)
-    def show_start_screen(self):
-        self.screen.fill(BGCOLOR)
-        self.draw_text(self.screen, str("This is the start screen"), 24, WHITE, WIDTH/2 -32, 2)
-        pg.display.flip()
-        self.wait_for_key()
-
-    def wait_for_key(self):
-        waiting = True
-        while waiting: 
-            self.clock.tick(FPS)
-            for event in pg.event.get():
-                if event.type == pg.QUIT:
-                    waiting = False
-                    self.quit()
-                if event.type == pg.KEYUP:
-                    waiting = False
-        
-
-
-
 # def g as game
 g = Game()
 # use run method to start things
-g.show_start_screen()
+# g.show_start_screen()
 while True:
     g.new()
     g.run()
