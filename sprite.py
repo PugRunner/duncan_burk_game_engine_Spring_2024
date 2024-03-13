@@ -93,7 +93,7 @@ from random import randint
 #                     self.x =525
 #                     self.y =50
 
-class Sheild(pg.sprite.Sprite):
+class Shield(pg.sprite.Sprite):
     def __init__(self, game, x, y):
             self.groups = game.all_sprites
             # init super class
@@ -110,6 +110,10 @@ class Sheild(pg.sprite.Sprite):
             self.moneybag = 0
             self.spedd = 300
             self.hitpoints = 100
+    def respawn(self):
+        # Set player's position to a respawn point
+        self.rect.x = RESPAWN_X
+        self.rect.y = RESPAWN_Y 
     
     # def key presses for movement and player speed
     def get_keys(self):
@@ -172,7 +176,8 @@ class Sheild(pg.sprite.Sprite):
             if str(hits[0].__class__.__name__) == "Done":
                 self.quit()
             if str(hits[0].__class__.__name__) == "Mob":
-                self.quit()
+                self.x = RESPAWN_X * TILESIZE
+                self.y = RESPAWN_Y * TILESIZE
             if str(hits[0].__class__.__name__) == "PowerUp":
                     global SheildSize 
                     SheildSize = self.image = pg.Surface((BIGTILESIZE, BIGTILESIZE))

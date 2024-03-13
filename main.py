@@ -50,6 +50,7 @@ class Game():
         self.teleports = pg.sprite.Group()
         self.dones = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
+        self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
         # self.player1 = Player(self)
         # for x in range(10, 20):d
         #     Wall(self, x, 5)
@@ -66,7 +67,7 @@ class Game():
                 if tile == 'C':
                     Coin(self, col, row)
                 if tile == 's':
-                    Sheild(self, col, row)
+                    Shield(self, col, row)
                 if tile == 'p':
                     PowerUp(self, col, row)
                 if tile == 'F':
