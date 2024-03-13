@@ -43,8 +43,7 @@ class Game():
     def new(self):
         print("create new game...")
         self.all_sprites = pg.sprite.Group()
-        self.wallsn = pg.sprite.Group()
-        self.wallss = pg.sprite.Group()
+        self.walls = pg.sprite.Group()
         self.coins = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
         self.fake_walls = pg.sprite.Group()
@@ -60,10 +59,7 @@ class Game():
                 print(col)
                 if tile == '1':
                     print("a wall at", row, col)
-                    WallN(self, col, row)
-                if tile == '2':
-                    print("a wall at", row, col)
-                    WallN(self, col, row)
+                    Wall(self, col, row)
                 # if tile == 'P':
                 #     print("A player at", row, col)
                 #     self.player1 = Player(self, col, row)
@@ -79,6 +75,8 @@ class Game():
                     Teleport(self, col, row)
                 if tile == 'd':
                     Done(self, col, row)
+                if tile == "M":
+                    Mob(self, col, row)
     # def run
     def run(self):
     # game lopp
