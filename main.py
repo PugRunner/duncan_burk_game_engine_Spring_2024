@@ -35,7 +35,7 @@ class Game():
         It is used to ensure that a resource is properly closed or released 
         after it is used. This can help to prevent errors and leaks.
         '''
-        with open(path.join(game_folder, 'map.txt'), 'rt') as f:
+        with open(path.join(game_folder, 'level1.txt'), 'rt') as f:
             for line in f:
                 print(line)
                 self.map_data.append(line)
@@ -44,7 +44,7 @@ class Game():
         print("create new game...")
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
-        self.coins = pg.sprite.Group()
+        self.gems = pg.sprite.Group()
         self.power_ups = pg.sprite.Group()
         self.fake_walls = pg.sprite.Group()
         self.teleports = pg.sprite.Group()
@@ -65,7 +65,7 @@ class Game():
                 #     print("A player at", row, col)
                 #     self.player1 = Player(self, col, row)
                 if tile == 'C':
-                    Coin(self, col, row)
+                    Gem(self, col, row)
                 if tile == 's':
                     Shield(self, col, row)
                 if tile == 'p':

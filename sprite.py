@@ -108,8 +108,9 @@ class Shield(pg.sprite.Sprite):
             self.x = x * TILESIZE
             self.y = y * TILESIZE
             self.moneybag = 0
-            self.spedd = 300
+            self.speed = 200
             self.hitpoints = 100
+            self.gem = 0
     def respawn(self):
         # Set player's position to a respawn point
         self.rect.x = RESPAWN_X
@@ -171,8 +172,8 @@ class Shield(pg.sprite.Sprite):
     def collide_with_group(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
         if hits:
-            if str(hits[0].__class__.__name__) == "Coin":
-                self.moneybag += 1
+            if str(hits[0].__class__.__name__) == "Gem":
+                self.gem += 1
             if str(hits[0].__class__.__name__) == "Done":
                 self.quit()
             if str(hits[0].__class__.__name__) == "Mob":
@@ -192,17 +193,18 @@ class Shield(pg.sprite.Sprite):
                     
                 
             
-    def update(self):
-            self.get_keys()
-            self.rect.y = self.y
-            self.rect.x = self.x
-            # collision 
-            self.collide_with_walls('y')
-            self.collide_with_group(self.game.coins, True)
-            self.collide_with_group(self.game.power_ups, True)
-            # coin_hits = pg.sprite.spritecollide(self.game.coins, True)
-            # if coin_hits:
-            #     print("I got a coin")
+    # def update(self):
+    #         self.get_keys()
+    #         self.rect.y = self.y
+    #         self.rect.x = self.x
+    #         # collision 
+    #         self.collide_with_walls('y')
+    #         self.collide_with_group(self.game.coins, True)
+    #         self.collide_with_group(self.game.power_ups, True)
+    #         self.collide_with_group(self.game.mobs, False)
+    #         # coin_hits = pg.sprite.spritecollide(self.game.coins, True)
+    #         # if coin_hits:
+    #         #     print("I got a coin")
 
     
     # def player size
@@ -228,9 +230,9 @@ class Shield(pg.sprite.Sprite):
             # moves player to 525, 50
             self.x =525
             self.y =50
-        if self.collide_with_group(self.game.coins, True):
-            # gives player more gold
-            self.gold += 1
+        if self.collide_with_group(self.game.gems, True):
+            # gives player more gem
+            self.gem += 1
         if self.collide_with_group(self.game.power_ups, True):
                     # makes player bigger
                     global PlayerSize
@@ -260,9 +262,9 @@ class Wall(pg.sprite.Sprite):
         self.rect.y = y * TILESIZE
 
 # def coin class
-class Coin(pg.sprite.Sprite):
+class Gem(pg.sprite.Sprite):
     def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.coins
+        self.groups = game.all_sprites, game.gems
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
