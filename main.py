@@ -122,7 +122,8 @@ class Game:
                 else:
                     # Handle end of the game or additional levels
                     self.playing = False
-        
+        if self.shield.life == 0:
+            self.show_death_screen()
     # Draws lines to form a grid
     def draw_grid(self):
         #  for x in range(0, WIDTH, TILESIZE):
@@ -159,9 +160,9 @@ class Game:
 
     def show_death_screen(self):
             self.screen.fill(BGCOLOR)
-            self.draw_text(self.screen, "Press ANY button to start AGAIN", 64, WHITE, 7, 10)
+            self.draw_text(self.screen, "Press ANY button to start AGAIN", 64, WHITE, 4.5, 10)
             pg.display.flip()
-            self.wait_for_key()
+            self.wait_for_key_death()
 
     def wait_for_key(self):
         waiting = True
@@ -176,6 +177,22 @@ class Game:
                 if event.type == pg.MOUSEBUTTONDOWN:
                     self.draw_text(self.screen, "Clicking is NOT pressing a BUTTON", 64, RED, 3, 13)
                     pg.display.flip()
+
+    def wait_for_key_death(self):
+        waiting = True
+        while waiting:
+            self.clock.tick(FPS)
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    waiting = False
+                    self.quit()
+                if event.type == pg.KEYUP:
+                    waiting = False
+                    self.new()  # Start a new game
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    self.draw_text(self.screen, "Clicking is NOT pressing a BUTTON", 64, RED, 3, 13)
+                    pg.display.flip()
+                
     # Lets you do events of movement/quiting
         # dx+1 is down
         # dx-1 is up
