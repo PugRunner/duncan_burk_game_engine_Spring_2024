@@ -20,6 +20,7 @@ LEVEL2 = "level2.txt"
 class Game:
     # Allows us to assign properties to the class
     def __init__(self):
+        self.current_level = 1
         #  initilaize pygame
         pg.init()
         # When run, create a screen with the widths from settings and height from settings and called "Title" from settings.
@@ -54,10 +55,13 @@ class Game:
                     Gem(self, col, row)
                 if tile == 'M':
                     Mob(self, col, row)
-                if tile == 'S':
+                if tile == 'p':
                     PowerUp(self, col, row)
         self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
-            
+        if lvl == LEVEL2:
+            # self.playing = False
+            self.current_level += 1
+
 
     # Create run method which runs the whole GAME
     def new(self):
@@ -71,6 +75,7 @@ class Game:
         self.dones = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
         self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
+
         for row, tiles in enumerate(self.map_data):
             print(row)
             for col, tile in enumerate(tiles):
@@ -112,8 +117,11 @@ class Game:
     def update(self):
         self.all_sprites.update()
         if self.shield.gem == 2:
-            self.change_level(LEVEL2)
-            
+                if self.current_level == 1:
+                    self.change_level(LEVEL2)
+                else:
+                    # Handle end of the game or additional levels
+                    self.playing = False
         
     # Draws lines to form a grid
     def draw_grid(self):
@@ -135,13 +143,23 @@ class Game:
             self.draw_grid()
             self.all_sprites.draw(self.screen)
             if self.shield.death == 1:
-                self.draw_text(self.screen, "Imaging Dying " + str(self.shield.death) + " Time On Level " + str(self.shield.gem), 32, WHITE, 11, 1)
+                self.draw_text(self.screen, "Imaging Dying " + str(self.shield.death) + " Time On Level " + str(self.current_level), 32, WHITE, 11, 1)
             if self.shield.death > 1:
-                self.draw_text(self.screen, "Imaging Dying " + str(self.shield.death) + " Times On Level " + str(self.shield.gem), 32, WHITE, 11, 1)
+                self.draw_text(self.screen, "Imaging Dying " + str(self.shield.death) + " Times On Level " + str(self.current_level), 32, WHITE, 11, 1)
+            if self.shield.life == 1:
+                self.draw_text(self.screen, str(self.shield.life) + " Life left", 32, WHITE, 1, 1)
+            if self.shield.life > 1:
+                self.draw_text(self.screen, str(self.shield.life) + " Lives Left", 32, WHITE, 1, 1)
             pg.display.flip()
     def show_start_screen(self):
             self.screen.fill(BGCOLOR)
             self.draw_text(self.screen, "Press ANY button to start", 64, WHITE, 7, 10)
+            pg.display.flip()
+            self.wait_for_key()
+
+    def show_death_screen(self):
+            self.screen.fill(BGCOLOR)
+            self.draw_text(self.screen, "Press ANY button to start AGAIN", 64, WHITE, 7, 10)
             pg.display.flip()
             self.wait_for_key()
 

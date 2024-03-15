@@ -112,6 +112,7 @@ class Shield(pg.sprite.Sprite):
             self.hitpoints = 100
             self.gem = 1
             self.death = 0
+            self.life = 10
     def respawn(self):
         # Set player's position to a respawn point
         self.rect.x = RESPAWN_X
@@ -178,6 +179,7 @@ class Shield(pg.sprite.Sprite):
             if str(hits[0].__class__.__name__) == "Done":
                 self.quit()
             if str(hits[0].__class__.__name__) == "Mob":
+                self.life -= 5
                 self.death += 1
                 self.x = RESPAWN_X * TILESIZE
                 self.y = RESPAWN_Y * TILESIZE
