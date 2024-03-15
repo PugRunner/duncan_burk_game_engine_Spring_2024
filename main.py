@@ -13,32 +13,52 @@ from settings import *
 from sprite import *
 from random import randint
 from os import path
-from math import floor
-# created object class of game
-class Game():
-   # Define a special method to init the properties of said class...
+import sys
+
+LEVEL1 = "level1.txt"
+LEVEL2 = "level2.txt"
+class Game:
+    # Allows us to assign properties to the class
     def __init__(self):
-        # init pygame
+        #  initilaize pygame
         pg.init()
-        # set size of screen and be the screen
+        # When run, create a screen with the widths from settings and height from settings and called "Title" from settings.
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         pg.display.set_caption(TITLE)
-        # setting game clock 
+        # setting Game Clock
         self.clock = pg.time.Clock()
         self.load_data()
-        # loads map in map.txt
     def load_data(self):
-        game_folder = path.dirname(__file__)
-        self.map_data = []
-        '''
-        The with statement is a context manager in Python. 
-        It is used to ensure that a resource is properly closed or released 
-        after it is used. This can help to prevent errors and leaks.
-        '''
-        with open(path.join(game_folder, 'level1.txt'), 'rt') as f:
+       self.game_folder = path.dirname(__file__)
+       self.map_data = []
+       with open(path.join(self.game_folder, LEVEL1), 'rt') as f:
             for line in f:
                 print(line)
                 self.map_data.append(line)
+
+    def test_method(self):
+        print("I can be called from Sprites...")
+    # added level change method
+    def change_level(self, lvl):
+        for s in self.all_sprites:
+            s.kill()
+        self.map_data = []
+        with open(path.join(self.game_folder, lvl), 'rt') as f:
+            for line in f:
+                self.map_data.append(line.strip())
+        for row, tiles in enumerate(self.map_data):
+            for col, tile in enumerate(tiles):
+                if tile == '1':
+                    Wall(self, col, row)
+                if tile == 'C':
+                    Gem(self, col, row)
+                if tile == 'M':
+                    Mob(self, col, row)
+                if tile == 'S':
+                    PowerUp(self, col, row)
+        self.shield = Shield(self, RESPAWN_X, RESPAWN_Y, gems=2)
+            
+
     # Create run method which runs the whole GAME
     def new(self):
         print("create new game...")
@@ -50,7 +70,7 @@ class Game():
         self.teleports = pg.sprite.Group()
         self.dones = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
-        self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
+        self.shield = Shield(self, RESPAWN_X, RESPAWN_Y, gems=1)
         # self.player1 = Player(self)
         # for x in range(10, 20):d
         #     Wall(self, x, 5)
@@ -80,16 +100,22 @@ class Game():
                     Mob(self, col, row)
     # def run
     def run(self):
-    # game lopp
-        self.playing = True
+        self.playing= True
         while self.playing:
+            # Set fps
             self.dt = self.clock.tick(FPS) / 1000
             self.events()
             self.update()
             self.draw()
-    # Lets you quit
+    def quit(self):
+        pg.quit()
+        sys.exit()
+    
     def update(self):
         self.all_sprites.update()
+        if self.shield.gem == 2:
+            self.change_level(LEVEL2)
+            
         
     # Draws lines to form a grid
     def draw_grid(self):
@@ -111,11 +137,9 @@ class Game():
             self.draw_grid()
             self.all_sprites.draw(self.screen)
             if self.shield.death == 1:
-                self.draw_text(self.screen, "Imaging Dying " + str(self.shield.death) + " Time", 32, WHITE, 11, 1)
+                self.draw_text(self.screen, "Imaging Dying " + str(self.shield.death) + " Time On Level " + str(self.shield.gem), 32, WHITE, 11, 1)
             if self.shield.death > 1:
-                self.draw_text(self.screen, "Imaging Dying " + str(self.shield.death) + " Times", 32, WHITE, 11, 1)
-            if self.shield.gem >= 1:
-                self.draw_text(self.screen, "Level " +str(self.shield.gem), 32, WHITE, 1, 1)
+                self.draw_text(self.screen, "Imaging Dying " + str(self.shield.death) + " Times On Level " + str(self.shield.gem), 32, WHITE, 11, 1)
             pg.display.flip()
     def show_start_screen(self):
             self.screen.fill(BGCOLOR)
@@ -143,18 +167,6 @@ class Game():
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.quit()
-            # if event.type == pg.KEYDOWN:
-            #     if event.key == pg.K_a:
-            #         self.player1.move(dx=-1)
-            # if event.type == pg.KEYDOWN:
-            #     if event.key == pg.K_d:
-            #         self.player1.move(dx=+1)
-            # if event.type == pg.KEYDOWN:
-            #     if event.key == pg.K_s:
-            #         self.player1.move(dy=+1)
-            # if event.type == pg.KEYDOWN:
-            #     if event.key == pg.K_w:
-            #         self.player1.move(dy=-1)
 # def g as game
 g = Game()
 # use run method to start things

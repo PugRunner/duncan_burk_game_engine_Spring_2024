@@ -94,7 +94,7 @@ from random import randint
 #                     self.y =50
 
 class Shield(pg.sprite.Sprite):
-    def __init__(self, game, x, y):
+    def __init__(self, game, x, y, gems=1):
             self.groups = game.all_sprites
             # init super class
             pg.sprite.Sprite.__init__(self, self.groups)
@@ -110,7 +110,7 @@ class Shield(pg.sprite.Sprite):
             self.moneybag = 0
             self.speed = 200
             self.hitpoints = 100
-            self.gem = 1
+            self.gem = gems
             self.death = 0
     def respawn(self):
         # Set player's position to a respawn point
@@ -209,20 +209,19 @@ class Shield(pg.sprite.Sprite):
     #         #     print("I got a coin")
 
     
-    # def player size
+    # def player size and Speed
     def update(self):
         self.get_keys()
         self.x += self.vx * self.game.dt
         self.y += self.vy * self.game.dt
         self.rect.x = self.x
         self.rect.y = self.y
-        #collision
-        # walls 
-        self.collide_with_walls('x')
+        #defines collision with walls
+        self.collide_with_walls('x') 
+        self.collide_with_walls('y')
+        # Does collision for everything 
         self.rect.y = self.y
         self.rect.x = self.x  
-        self.collide_with_walls('y')  
-        # gold coins
         if self.collide_with_group(self.game.fake_walls, True):
             pass
         if self.collide_with_group(self.game.dones, True):
@@ -277,6 +276,7 @@ class Gem(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
+# def a done game class
 class Done(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.dones
@@ -290,6 +290,7 @@ class Done(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
+# break able walls
 class FakeWall(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.fake_walls
@@ -303,6 +304,7 @@ class FakeWall(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
+# teleport block
 class Teleport(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.teleports
@@ -330,6 +332,7 @@ class PowerUp(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
+# Up down mob
 class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         self.groups = game.all_sprites, game.mobs
