@@ -345,5 +345,5 @@ class Mob(pg.sprite.Sprite):
         self.vy = 0.5
     def update(self):
         self.rect.y += TILESIZE * self.vy
-        if self.rect.y > WIDTH-1 or self.rect.y < 1:
+        if self.rect.y > HEIGHT-1 or self.rect.y < 1:
             self.vy *= -1
