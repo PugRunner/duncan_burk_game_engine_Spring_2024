@@ -189,6 +189,7 @@ class Game:
                 if event.type == pg.KEYUP:
                     waiting = False
                     self.change_level(LEVEL1)
+                    self.current_level = 1
                     self.new()  # Start a new game
                 if event.type == pg.MOUSEBUTTONDOWN:
                     self.draw_text(self.screen, "Clicking is NOT pressing a BUTTON", 64, RED, 3, 13)
