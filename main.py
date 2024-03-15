@@ -64,7 +64,7 @@ class Game():
                 # if tile == 'P':
                 #     print("A player at", row, col)
                 #     self.player1 = Player(self, col, row)
-                if tile == 'C':
+                if tile == 'G':
                     Gem(self, col, row)
                 if tile == 's':
                     Shield(self, col, row)
@@ -110,11 +110,16 @@ class Game():
             self.screen.fill(BGCOLOR)
             self.draw_grid()
             self.all_sprites.draw(self.screen)
-            # self.draw_text(self.screen, str(self.player1.moneybag), 64, WHITE, 1, 1)
+            if self.shield.death == 1:
+                self.draw_text(self.screen, "Imaging Dying " + str(self.shield.death) + " Time", 32, WHITE, 11, 1)
+            if self.shield.death > 1:
+                self.draw_text(self.screen, "Imaging Dying " + str(self.shield.death) + " Times", 32, WHITE, 11, 1)
+            if self.shield.gem >= 1:
+                self.draw_text(self.screen, "Level " +str(self.shield.gem), 32, WHITE, 1, 1)
             pg.display.flip()
     def show_start_screen(self):
             self.screen.fill(BGCOLOR)
-            self.draw_text(self.screen, "This is the start screen", 24, WHITE, WIDTH/2 - 32, 2)
+            self.draw_text(self.screen, "Press ANY button to start", 64, WHITE, 7, 10)
             pg.display.flip()
             self.wait_for_key()
 
@@ -128,6 +133,9 @@ class Game():
                     self.quit()
                 if event.type == pg.KEYUP:
                     waiting = False
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    self.draw_text(self.screen, "Clicking is NOT pressing a BUTTON", 64, RED, 3, 13)
+                    pg.display.flip()
     # Lets you do events of movement/quiting
         # dx+1 is down
         # dx-1 is up

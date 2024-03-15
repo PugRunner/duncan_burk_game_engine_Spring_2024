@@ -110,7 +110,8 @@ class Shield(pg.sprite.Sprite):
             self.moneybag = 0
             self.speed = 200
             self.hitpoints = 100
-            self.gem = 0
+            self.gem = 1
+            self.death = 0
     def respawn(self):
         # Set player's position to a respawn point
         self.rect.x = RESPAWN_X
@@ -177,6 +178,7 @@ class Shield(pg.sprite.Sprite):
             if str(hits[0].__class__.__name__) == "Done":
                 self.quit()
             if str(hits[0].__class__.__name__) == "Mob":
+                self.death += 1
                 self.x = RESPAWN_X * TILESIZE
                 self.y = RESPAWN_Y * TILESIZE
             if str(hits[0].__class__.__name__) == "PowerUp":
@@ -268,7 +270,7 @@ class Gem(pg.sprite.Sprite):
         pg.sprite.Sprite.__init__(self, self.groups)
         self.game = game
         self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(YELLOW)
+        self.image.fill(GREEN)
         self.rect = self.image.get_rect()
         self.x = x
         self.y = y
