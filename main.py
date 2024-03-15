@@ -56,7 +56,7 @@ class Game:
                     Mob(self, col, row)
                 if tile == 'S':
                     PowerUp(self, col, row)
-        self.shield = Shield(self, RESPAWN_X, RESPAWN_Y, gems=2)
+        self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
             
 
     # Create run method which runs the whole GAME
@@ -70,10 +70,7 @@ class Game:
         self.teleports = pg.sprite.Group()
         self.dones = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
-        self.shield = Shield(self, RESPAWN_X, RESPAWN_Y, gems=1)
-        # self.player1 = Player(self)
-        # for x in range(10, 20):d
-        #     Wall(self, x, 5)
+        self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
         for row, tiles in enumerate(self.map_data):
             print(row)
             for col, tile in enumerate(tiles):
@@ -98,6 +95,7 @@ class Game:
                     Done(self, col, row)
                 if tile == "M":
                     Mob(self, col, row)
+                
     # def run
     def run(self):
         self.playing= True

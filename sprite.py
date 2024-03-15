@@ -94,7 +94,7 @@ from random import randint
 #                     self.y =50
 
 class Shield(pg.sprite.Sprite):
-    def __init__(self, game, x, y, gems=1):
+    def __init__(self, game, x, y):
             self.groups = game.all_sprites
             # init super class
             pg.sprite.Sprite.__init__(self, self.groups)
@@ -110,7 +110,7 @@ class Shield(pg.sprite.Sprite):
             self.moneybag = 0
             self.speed = 200
             self.hitpoints = 100
-            self.gem = gems
+            self.gem = 1
             self.death = 0
     def respawn(self):
         # Set player's position to a respawn point
