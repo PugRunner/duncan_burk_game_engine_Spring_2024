@@ -51,6 +51,8 @@ class Game:
             for col, tile in enumerate(tiles):
                 if tile == '1':
                     Wall(self, col, row)
+                if tile == 'd':
+                    Done(self, col, row)
                 if tile == 'C':
                     Gem(self, col, row)
                 if tile == 'M':
@@ -124,6 +126,8 @@ class Game:
                     self.playing = False
         if self.shield.life == 0:
             self.show_death_screen()
+        if self.shield.end == 1:
+            self.show_end_screen()
     # Draws lines to form a grid
     def draw_grid(self):
         #  for x in range(0, WIDTH, TILESIZE):
@@ -164,6 +168,13 @@ class Game:
             pg.display.flip()
             self.wait_for_key_death()
 
+    def show_end_screen(self):
+            self.screen.fill(BGCOLOR)
+            self.draw_text(self.screen, "good job you beat this game", 64, WHITE, 6, 8)
+            self.draw_text(self.screen, "Press ANY button to start again", 64, RED, 5, 10)
+            pg.display.flip()
+            self.wait_for_key_death()
+
     def wait_for_key(self):
         waiting = True
         while waiting:
@@ -186,7 +197,7 @@ class Game:
                 if event.type == pg.QUIT:
                     waiting = False
                     self.quit()
-                if event.type == pg.KEYUP:
+                if event.type == pg.KEYDOWN:
                     waiting = False
                     self.change_level(LEVEL1)
                     self.current_level = 1
