@@ -152,9 +152,9 @@ class Game:
             self.draw_grid()
             self.all_sprites.draw(self.screen)
             if self.shield.death == 1:
-                self.draw_text(self.screen, "Imaging Dying " + str(self.shield.death) + " Time On Level " + str(self.current_level), 32, WHITE, 11, 1)
+                self.draw_text(self.screen, "Imagine Dying " + str(self.shield.death) + " Time On Level " + str(self.current_level), 32, WHITE, 11, 1)
             if self.shield.death > 1:
-                self.draw_text(self.screen, "Imaging Dying " + str(self.shield.death) + " Times On Level " + str(self.current_level), 32, WHITE, 11, 1)
+                self.draw_text(self.screen, "Imagine Dying " + str(self.shield.death) + " Times On Level " + str(self.current_level), 32, WHITE, 11, 1)
             if self.shield.life == 1:
                 self.draw_text(self.screen, str(self.shield.life) + " Life left", 32, WHITE, 1, 1)
             if self.shield.life > 1:
