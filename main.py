@@ -14,12 +14,13 @@ from sprite import *
 from random import randint
 from os import path
 import sys
-
+# defines level files
 LEVEL1 = "level1.txt"
 LEVEL2 = "level2.txt"
 class Game:
     # Allows us to assign properties to the class
     def __init__(self):
+        # makes it so that first level is 1 so that code easier to keep track of level
         self.current_level = 1
         #  initilaize pygame
         pg.init()
@@ -28,7 +29,9 @@ class Game:
         pg.display.set_caption(TITLE)
         # setting Game Clock
         self.clock = pg.time.Clock()
+        # loads data
         self.load_data()
+        # defines data for leel 1 file
     def load_data(self):
        self.game_folder = path.dirname(__file__)
        self.map_data = []
@@ -37,8 +40,6 @@ class Game:
                 print(line)
                 self.map_data.append(line)
 
-    def test_method(self):
-        print("I can be called from Sprites...")
     # added level change method
     def change_level(self, lvl):
         for s in self.all_sprites:
@@ -48,6 +49,7 @@ class Game:
             for line in f:
                 self.map_data.append(line.strip())
         for row, tiles in enumerate(self.map_data):
+            # uses map file to load class using characters
             for col, tile in enumerate(tiles):
                 if tile == '1':
                     Wall(self, col, row)
@@ -59,15 +61,16 @@ class Game:
                     Mob(self, col, row)
                 if tile == 'p':
                     PowerUp(self, col, row)
+        # gives player a spawn point
         self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
         if lvl == LEVEL2:
-            # self.playing = False
+            # help keep trrack of things for levels
             self.current_level += 1
 
 
     # Create run method which runs the whole GAME
     def new(self):
-        print("create new game...")
+        # loads all sprites
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.gems = pg.sprite.Group()
@@ -76,8 +79,9 @@ class Game:
         self.teleports = pg.sprite.Group()
         self.dones = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
+        # gives player a spawn point
         self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
-
+        # load classes
         for row, tiles in enumerate(self.map_data):
             print(row)
             for col, tile in enumerate(tiles):
@@ -85,9 +89,6 @@ class Game:
                 if tile == '1':
                     print("a wall at", row, col)
                     Wall(self, col, row)
-                # if tile == 'P':
-                #     print("A player at", row, col)
-                #     self.player1 = Player(self, col, row)
                 if tile == 'G':
                     Gem(self, col, row)
                 if tile == 's':
@@ -112,10 +113,11 @@ class Game:
             self.events()
             self.update()
             self.draw()
+    # def quit so you can quit
     def quit(self):
         pg.quit()
         sys.exit()
-    
+    # def updates in game 
     def update(self):
         self.all_sprites.update()
         if self.shield.gem == 2:
@@ -135,6 +137,7 @@ class Game:
         #  for y in range(0, HEIGHT, TILESIZE):
         #       pg.draw.line(self.screen, LIGHTGREY, (0, y), (WIDTH, y))
         pass
+    # def text font
     def draw_text(self, surface, text, size, color, x, y):
         font_name = pg.font.match_font('arial')
         font = pg.font.Font(font_name, size)
@@ -143,6 +146,7 @@ class Game:
         text_rect.topleft = (x*TILESIZE,y*TILESIZE)
         surface.blit(text_surface, text_rect)
 
+    # def draw for different events
     def draw(self):
             self.screen.fill(BGCOLOR)
             self.draw_grid()
@@ -156,18 +160,21 @@ class Game:
             if self.shield.life > 1:
                 self.draw_text(self.screen, str(self.shield.life) + " Lives Left", 32, WHITE, 1, 1)
             pg.display.flip()
+    # lets start screen stay up till button pressed
     def show_start_screen(self):
             self.screen.fill(BGCOLOR)
             self.draw_text(self.screen, "Press ANY button to start", 64, WHITE, 7, 10)
             pg.display.flip()
             self.wait_for_key()
 
+    # same for start screen just for death screen
     def show_death_screen(self):
             self.screen.fill(BGCOLOR)
             self.draw_text(self.screen, "Press ANY button to start AGAIN", 64, WHITE, 4.5, 10)
             pg.display.flip()
             self.wait_for_key_death()
 
+    # same as those above
     def show_end_screen(self):
             self.screen.fill(BGCOLOR)
             self.draw_text(self.screen, "good job you beat this game", 64, WHITE, 6, 8)
@@ -175,6 +182,7 @@ class Game:
             pg.display.flip()
             self.wait_for_key_death()
 
+    # def what wait for key is and what actions to take
     def wait_for_key(self):
         waiting = True
         while waiting:
@@ -189,6 +197,7 @@ class Game:
                     self.draw_text(self.screen, "Clicking is NOT pressing a BUTTON", 64, RED, 3, 13)
                     pg.display.flip()
 
+     # def what wait for key is and what actions to take
     def wait_for_key_death(self):
         waiting = True
         while waiting:
@@ -207,8 +216,6 @@ class Game:
                     pg.display.flip()
                 
     # Lets you do events of movement/quiting
-        # dx+1 is down
-        # dx-1 is up
     def events(self):
         for event in pg.event.get():
             if event.type == pg.QUIT:

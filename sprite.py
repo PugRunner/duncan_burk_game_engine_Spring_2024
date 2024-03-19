@@ -93,11 +93,13 @@ from random import randint
 #                     self.x =525
 #                     self.y =50
 
+# player shield class
 class Shield(pg.sprite.Sprite):
     def __init__(self, game, x, y):
             self.groups = game.all_sprites
             # init super class
             pg.sprite.Sprite.__init__(self, self.groups)
+            # def atrobutes about shield
             self.game = game
             global SheildSize
             SheildSize = self.image = pg.Surface((SHEILDX, SHEILDY))
@@ -171,7 +173,8 @@ class Shield(pg.sprite.Sprite):
                     self.y = hits[0].rect.bottom
                 self.vy = 0
                 self.rect.y = self.y
-                
+
+    # ddef what happens when things collides
     def collide_with_group(self, group, kill):
         hits = pg.sprite.spritecollide(self, group, kill)
         if hits:
@@ -224,7 +227,8 @@ class Shield(pg.sprite.Sprite):
         self.collide_with_walls('y')
         # Does collision for everything 
         self.rect.y = self.y
-        self.rect.x = self.x  
+        self.rect.x = self.x 
+        # def collision for up happens for everything
         if self.collide_with_group(self.game.fake_walls, True):
             pass
         if self.collide_with_group(self.game.dones, True):
