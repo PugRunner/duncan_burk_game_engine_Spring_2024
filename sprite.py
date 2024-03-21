@@ -192,27 +192,11 @@ class Shield(pg.sprite.Sprite):
                     SheildSize = self.image = pg.Surface((BIGTILESIZE, BIGTILESIZE))
                     self.image.fill(GREEN)
                     self.rect = self.image.get_rect()
-                    # self.vx, self.vy = 0, 0
-                    # self.x * BIGTILESIZE
-                    # self.y * BIGTILESIZE
             if str(hits[0].__class__.__name__) == "Teleport":
                     self.x =525
                     self.y =50
                     
                 
-            
-    # def update(self):
-    #         self.get_keys()
-    #         self.rect.y = self.y
-    #         self.rect.x = self.x
-    #         # collision 
-    #         self.collide_with_walls('y')
-    #         self.collide_with_group(self.game.coins, True)
-    #         self.collide_with_group(self.game.power_ups, True)
-    #         self.collide_with_group(self.game.mobs, False)
-    #         # coin_hits = pg.sprite.spritecollide(self.game.coins, True)
-    #         # if coin_hits:
-    #         #     print("I got a coin")
 
     
     # def player size and Speed
