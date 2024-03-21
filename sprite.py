@@ -326,18 +326,18 @@ class PowerUp(pg.sprite.Sprite):
 # Up down mob
 class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):
-        self.groups = game.all_sprites, game.mobs
-        pg.sprite.Sprite.__init__(self, self.groups)
+        super().__init__(game.all_sprites, game.mobs)
         self.game = game
-        self.image = pg.Surface((TILESIZE, TILESIZE))
-        self.image.fill(RED)
+        self.image = game.mob_img
         self.rect = self.image.get_rect()
-        self.x = x
-        self.y = y
+        self.image = pg.transform.rotate(self.image, -180)
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
-        self.vy = 0.5
+        self.vy = 15
+
     def update(self):
-        self.rect.y += TILESIZE * self.vy
-        if self.rect.y > HEIGHT-1 or self.rect.y < 1:
+        self.rect.y += self.vy
+        if self.rect.top <= 0 or self.rect.bottom >= HEIGHT:
             self.vy *= -1
+            self.image = pg.transform.rotate(self.image, -180)
+    

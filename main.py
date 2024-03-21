@@ -33,9 +33,12 @@ class Game:
         self.load_data()
         # defines data for leel 1 file
     def load_data(self):
-       self.game_folder = path.dirname(__file__)
-       self.map_data = []
-       with open(path.join(self.game_folder, LEVEL1), 'rt') as f:
+        self.game_folder = path.dirname(__file__)
+        self.img_folder = path.join(self.game_folder, 'images')
+    #    acually sprites
+        self.mob_img = pg.image.load(path.join(self.img_folder, 'red_triangle.png.ico')).convert_alpha()
+        self.map_data = []
+        with open(path.join(self.game_folder, LEVEL1), 'rt') as f:
             for line in f:
                 print(line)
                 self.map_data.append(line)
