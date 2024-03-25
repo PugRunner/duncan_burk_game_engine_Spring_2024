@@ -187,6 +187,11 @@ class Shield(pg.sprite.Sprite):
                 self.death += 1
                 self.x = RESPAWN_X * TILESIZE
                 self.y = RESPAWN_Y * TILESIZE
+            if str(hits[0].__class__.__name__) == "Sideway":
+                self.life -= 1
+                self.death += 1
+                self.x = RESPAWN_X * TILESIZE
+                self.y = RESPAWN_Y * TILESIZE
             if str(hits[0].__class__.__name__) == "PowerUp":
                     global SheildSize 
                     SheildSize = self.image = pg.Surface((BIGTILESIZE, BIGTILESIZE))
@@ -340,4 +345,22 @@ class Mob(pg.sprite.Sprite):
         if self.rect.top <= 0 or self.rect.bottom >= HEIGHT:
             self.vy *= -1
             self.image = pg.transform.rotate(self.image, -180)
+
+    
+# Up down mob
+class Sideway(pg.sprite.Sprite):
+    def __init__(self, game, x, y):
+        super().__init__(game.all_sprites, game.sideways)
+        self.game = game
+        self.image = pg.transform.rotate(game.mob_img, -90)
+        self.rect = self.image.get_rect()
+        self.rect.x = x * TILESIZE
+        self.rect.y = y * TILESIZE
+        self.vx = 15
+
+    def update(self):
+        self.rect.x += self.vx
+        if self.rect.right <= 0 or self.rect.left >= WIDTH:
+            self.vx *= -1
+            self.image = pg.transform.rotate(self.image, 180)
     

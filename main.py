@@ -17,6 +17,7 @@ import sys
 # defines level files
 LEVEL1 = "level1.txt"
 LEVEL2 = "level2.txt"
+LEVEL3 = "level3.txt"
 class Game:
     # Allows us to assign properties to the class
     def __init__(self):
@@ -58,15 +59,21 @@ class Game:
                     Wall(self, col, row)
                 if tile == 'd':
                     Done(self, col, row)
-                if tile == 'C':
+                if tile == 'G':
                     Gem(self, col, row)
                 if tile == 'M':
                     Mob(self, col, row)
+                if tile == 'U':
+                    Sideway(self, col, row)
                 if tile == 'p':
                     PowerUp(self, col, row)
         # gives player a spawn point
         self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
         if lvl == LEVEL2:
+            # help keep trrack of things for levels
+            self.current_level += 1
+        if lvl == LEVEL3:
+            self.shield= Shield(self, RESPAWN_X_LEFT, RESPAWN_Y_UP)
             # help keep trrack of things for levels
             self.current_level += 1
 
@@ -82,6 +89,7 @@ class Game:
         self.teleports = pg.sprite.Group()
         self.dones = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
+        self.sideways = pg.sprite.Group()
         # gives player a spawn point
         self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
         # load classes
@@ -106,6 +114,8 @@ class Game:
                     Done(self, col, row)
                 if tile == "M":
                     Mob(self, col, row)
+                if tile == "U":
+                    Sideway(self, col, row)
                 
     # def run
     def run(self):
@@ -116,6 +126,7 @@ class Game:
             self.events()
             self.update()
             self.draw()
+            self.reder_screen()
     # def quit so you can quit
     def quit(self):
         pg.quit()
@@ -126,6 +137,12 @@ class Game:
         if self.shield.gem == 2:
                 if self.current_level == 1:
                     self.change_level(LEVEL2)
+                else:
+                    # Handle end of the game or additional levels
+                    self.playing = False
+        if self.shield.gem == 2:
+                if self.current_level == 2:
+                    self.change_level(LEVEL3)
                 else:
                     # Handle end of the game or additional levels
                     self.playing = False
@@ -149,6 +166,10 @@ class Game:
         text_rect.topleft = (x*TILESIZE,y*TILESIZE)
         surface.blit(text_surface, text_rect)
 
+    # makes screen reder when player dies
+    def reder_screen(self):
+        global BGCOLOR
+        BGCOLOR = (0 + 15*self.shield.death, 0, 0)
     # def draw for different events
     def draw(self):
             self.screen.fill(BGCOLOR)
