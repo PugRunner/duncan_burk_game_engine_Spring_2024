@@ -44,7 +44,7 @@ class Game:
                 print(line)
                 self.map_data.append(line)
 
-    # added level change method
+        # def way to shange level
     def change_level(self, lvl):
         for s in self.all_sprites:
             s.kill()
@@ -53,7 +53,6 @@ class Game:
             for line in f:
                 self.map_data.append(line.strip())
         for row, tiles in enumerate(self.map_data):
-            # uses map file to load class using characters
             for col, tile in enumerate(tiles):
                 if tile == '1':
                     Wall(self, col, row)
@@ -67,15 +66,12 @@ class Game:
                     Sideway(self, col, row)
                 if tile == 'p':
                     PowerUp(self, col, row)
-        # gives player a spawn point
+        # Check if the current level is level 3
         self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
-        if lvl == LEVEL2:
-            # help keep trrack of things for levels
-            self.current_level += 1
-        if lvl == LEVEL3:
-            self.shield= Shield(self, RESPAWN_X_LEFT, RESPAWN_Y_UP)
-            # help keep trrack of things for levels
-            self.current_level += 1
+        # Incrementing the current level should come after setting the spawn point
+        self.current_level += 1
+
+                
 
 
     # Create run method which runs the whole GAME

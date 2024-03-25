@@ -240,7 +240,9 @@ class Shield(pg.sprite.Sprite):
                     # self.x *BIGTILESIZE
                     # self.y *BIGTILESIZE
         if self.collide_with_group(self.game.mobs, True):
-            self.quit
+            pass
+        if self.collide_with_group(self.game.sideways, True):
+            pass
                     
 
 
@@ -356,7 +358,7 @@ class Sideway(pg.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
-        self.vx = 15
+        self.vx = 20
 
     def update(self):
         self.rect.x += self.vx
