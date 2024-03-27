@@ -38,6 +38,7 @@ class Game:
         self.img_folder = path.join(self.game_folder, 'images')
     #    acually sprites
         self.mob_img = pg.image.load(path.join(self.img_folder, 'red_triangle.png.ico')).convert_alpha()
+        self.circle_img = pg.image.load(path.join(self.img_folder, 'red_circle.png')).convert_alpha()
         self.map_data = []
         with open(path.join(self.game_folder, LEVEL1), 'rt') as f:
             for line in f:
@@ -64,8 +65,6 @@ class Game:
                     Mob(self, col, row)
                 if tile == 'U':
                     Sideway(self, col, row)
-                if tile == 'p':
-                    PowerUp(self, col, row)
         # Check if the current level is level 3
         self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
         # Incrementing the current level should come after setting the spawn point
@@ -100,8 +99,6 @@ class Game:
                     Gem(self, col, row)
                 if tile == 's':
                     Shield(self, col, row)
-                if tile == 'p':
-                    PowerUp(self, col, row)
                 if tile == 'F':
                     FakeWall(self, col, row)
                 if tile == 't':
