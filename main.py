@@ -18,6 +18,7 @@ import sys
 LEVEL1 = "level1.txt"
 LEVEL2 = "level2.txt"
 LEVEL3 = "level3.txt"
+LEVEL4 = "level4.txt"
 class Game:
     # Allows us to assign properties to the class
     def __init__(self):
@@ -136,6 +137,9 @@ class Game:
         if self.shield.gem == 2:
                 if self.current_level == 2:
                     self.change_level(LEVEL3)
+        if self.shield.gem == 2:
+                if self.current_level == 3:
+                    self.change_level(LEVEL4)
                 else:
                     # Handle end of the game or additional levels
                     self.playing = False
