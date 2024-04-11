@@ -229,7 +229,6 @@ class Teleport(pg.sprite.Sprite):
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
 
-# def power up class
 class Mob(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         super().__init__(game.all_sprites, game.mobs)
@@ -255,8 +254,9 @@ class Sideway(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         super().__init__(game.all_sprites, game.sideways)
         self.game = game
-        self.image = pg.transform.rotate(game.circle_img, -90)
+        self.image = game.mob_img
         self.rect = self.image.get_rect()
+        self.image = pg.transform.rotate(self.image, -90)
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
         self.vx = 15
@@ -266,4 +266,3 @@ class Sideway(pg.sprite.Sprite):
         if self.rect.right <= 0 or self.rect.left >= WIDTH:
             self.vx *= -1
             self.image = pg.transform.rotate(self.image, 180)
-    
