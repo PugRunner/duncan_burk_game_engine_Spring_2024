@@ -1,43 +1,64 @@
-# This filed created by: Duncan Burk
-# Github is now listening
-# Imports pygame as pg and imports settings code
-
-'''
-change player
-projectiles
-killing player
-'''
-
-import pygame as pg 
-from settings import *
-from sprite import *
-from random import randint
+import pygame as pg
+from settings import *  # Make sure all required constants are defined in settings.py
+from sprite import *  # Assuming sprite.py contains the sprite classes
 from os import path
 import sys
+
 # defines level files
 LEVEL1 = "level1.txt"
 LEVEL2 = "level2.txt"
 LEVEL3 = "level3.txt"
 LEVEL4 = "level4.txt"
+
+class Timer:
+    def __init__(self):
+        self.current_time = 0
+        self.cd = 0
+        # Initialize the timer with 60 seconds
+        self.start_timer(60)
+
+    def ticking(self):
+        self.current_time = pg.time.get_ticks() / 1000
+        if self.cd > 0:
+            self.cd -= 1  # Decrease timer by 1 second
+
+    def start_timer(self, duration):
+        self.cd = duration
+
+    def is_finished(self):
+        return self.cd <= 0
+
+
 class Game:
     # Allows us to assign properties to the class
     def __init__(self):
         # makes it so that first level is 1 so that code easier to keep track of level
         self.current_level = 1
-        #  initilaize pygame
+        # initialize the last update time
+        self.last_update = pg.time.get_ticks()
+        #  initialize pygame
         pg.init()
         # When run, create a screen with the widths from settings and height from settings and called "Title" from settings.
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         pg.display.set_caption(TITLE)
         # setting Game Clock
         self.clock = pg.time.Clock()
+        # game clock
+        self.timer = Timer()
+        self.shield_duration = 0  
+        self.shield_active = False
+        self.life_duration = 1800  # 60 is about 2 second
+        self.life_timer = Timer()
+        self.life = 0
         # loads data
         self.load_data()
         # defines data for leel 1 file
+        self.last_update = pg.time.get_ticks()  # Initialize last_update here
+
     def load_data(self):
         self.game_folder = path.dirname(__file__)
         self.img_folder = path.join(self.game_folder, 'images')
-    #    acually sprites
+        #    actually sprites
         self.mob_img = pg.image.load(path.join(self.img_folder, 'red_triangle.png.ico')).convert_alpha()
         self.circle_img = pg.image.load(path.join(self.img_folder, 'red_circle.png')).convert_alpha()
         self.map_data = []
@@ -46,7 +67,7 @@ class Game:
                 print(line)
                 self.map_data.append(line)
 
-        # def way to shange level
+    # def way to change level
     def change_level(self, lvl):
         for s in self.all_sprites:
             s.kill()
@@ -66,13 +87,12 @@ class Game:
                     Mob(self, col, row)
                 if tile == 'U':
                     Sideway(self, col, row)
+        # Reset the timer when changing levels
+        self.timer.start_timer(LEVEL_DURATION)
         # Check if the current level is level 3
         self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
         # Incrementing the current level should come after setting the spawn point
         self.current_level += 1
-
-                
-
 
     # Create run method which runs the whole GAME
     def new(self):
@@ -88,6 +108,13 @@ class Game:
         self.sideways = pg.sprite.Group()
         # gives player a spawn point
         self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
+        # player timer
+        self.timer.start_timer(60)  # Start the timer at 60 seconds
+        self.shield_active = True
+        # life timer
+        self.life_timer.start_timer(self.life_duration)
+        # Set self.life after shield initialization
+        self.life = self.shield.life
         # load classes
         for row, tiles in enumerate(self.map_data):
             print(row)
@@ -110,10 +137,12 @@ class Game:
                     Mob(self, col, row)
                 if tile == "U":
                     Sideway(self, col, row)
+
                 
     # def run
+        # def run
     def run(self):
-        self.playing= True
+        self.playing = True
         while self.playing:
             # Set fps
             self.dt = self.clock.tick(FPS) / 1000
@@ -121,39 +150,69 @@ class Game:
             self.update()
             self.draw()
             self.reder_screen()
+
+            # Decrease display timer by 1 second
+            self.timer.cd -= self.dt
+
+            # Check if the display timer has reached 0
+            if self.timer.cd <= 0:
+                # Reset the display timer to 0 to ensure it doesn't go negative
+                self.timer.cd = 0
+                # Handle any actions when the timer reaches 0
+
+
+
     # def quit so you can quit
     def quit(self):
         pg.quit()
         sys.exit()
+
     # def updates in game 
     def update(self):
+        # Calculate the elapsed time since the last update call
+        elapsed_time = pg.time.get_ticks() - self.last_update
+        self.last_update = pg.time.get_ticks()
+
         self.all_sprites.update()
         if self.shield.gem == 2:
-                if self.current_level == 1:
-                    self.change_level(LEVEL2)
-                else:
-                    # Handle end of the game or additional levels
-                    self.playing = False
-        if self.shield.gem == 2:
-                if self.current_level == 2:
-                    self.change_level(LEVEL3)
-        if self.shield.gem == 2:
-                if self.current_level == 3:
-                    self.change_level(LEVEL4)
-                else:
-                    # Handle end of the game or additional levels
-                    self.playing = False
+            if self.current_level == 1:
+                self.change_level(LEVEL2)
+            elif self.current_level == 2:
+                self.change_level(LEVEL3)
+            elif self.current_level == 3:
+                self.change_level(LEVEL4)
+            else:
+                # Handle end of the game or additional levels
+                self.playing = False
         if self.shield.life == 0:
             self.show_death_screen()
         if self.shield.end == 1:
             self.show_end_screen()
+        if self.shield_active:
+            self.timer.ticking()
+            if self.timer.is_finished():
+                self.shield_active = False
+                # Start life timer when shield expires
+                self.life_timer.start_timer(self.life_duration)
+        else:
+            self.life_timer.ticking()
+            if self.life_timer.is_finished():
+                self.shield.life -= 10
+                # Restart life timer and shield timer when a life is lost
+                self.life_timer.start_timer(self.life_duration)
+                self.timer.start_timer(LEVEL_DURATION)
+
+        # Decrement the display timer by 1 for every 1000 milliseconds (1 second)
+        if not self.timer.is_finished():
+            self.timer.cd -= elapsed_time / 1000
+
+
+
+
     # Draws lines to form a grid
     def draw_grid(self):
-        #  for x in range(0, WIDTH, TILESIZE):
-        #       pg.draw.line(self.screen, LIGHTGREY, (x, 0), (x, HEIGHT))
-        #  for y in range(0, HEIGHT, TILESIZE):
-        #       pg.draw.line(self.screen, LIGHTGREY, (0, y), (WIDTH, y))
         pass
+
     # def text font
     def draw_text(self, surface, text, size, color, x, y):
         font_name = pg.font.match_font('arial')
@@ -163,45 +222,51 @@ class Game:
         text_rect.topleft = (x*TILESIZE,y*TILESIZE)
         surface.blit(text_surface, text_rect)
 
-    # makes screen reder when player dies
+    # makes screen render when player dies
     def reder_screen(self):
         global BGCOLOR
         BGCOLOR = (0 + 15*self.shield.death, 0, 0)
+
     # def draw for different events
     def draw(self):
-            self.screen.fill(BGCOLOR)
-            self.draw_grid()
-            self.all_sprites.draw(self.screen)
-            if self.shield.death == 1:
-                self.draw_text(self.screen, "Imagine Dying " + str(self.shield.death) + " Time On Level " + str(self.current_level), 32, WHITE, 11, 1)
-            if self.shield.death > 1:
-                self.draw_text(self.screen, "Imagine Dying " + str(self.shield.death) + " Times On Level " + str(self.current_level), 32, WHITE, 11, 1)
-            if self.shield.life == 1:
-                self.draw_text(self.screen, str(self.shield.life) + " Life left", 32, WHITE, 1, 1)
-            if self.shield.life > 1:
-                self.draw_text(self.screen, str(self.shield.life) + " Lives Left", 32, WHITE, 1, 1)
-            pg.display.flip()
+        self.screen.fill(BGCOLOR)
+        # Draw countdown timer in the top left corner
+        self.draw_text(self.screen, "Timer: {}".format(max(0, self.timer.cd)), 32, WHITE, 24, 1)
+        self.all_sprites.draw(self.screen)
+        if self.shield.death == 1:
+            self.draw_text(self.screen, "Imagine Dying " + str(self.shield.death) + " Time On Level " + str(self.current_level), 32, WHITE, 11, 1)
+        if self.shield.death > 1:
+            self.draw_text(self.screen, "Imagine Dying " + str(self.shield.death) + " Times On Level " + str(self.current_level), 32, WHITE, 11, 1)
+        if self.shield.life == 1:
+            self.draw_text(self.screen, str(self.shield.life) + " Life left", 32, WHITE, 1, 1)
+        if self.shield.life > 1:
+            self.draw_text(self.screen, str(self.shield.life) + " Lives Left", 32, WHITE, 1, 1)
+        if self.shield_active:
+            # Draw shield UI or anything related to an active shield
+            pass
+        pg.display.flip()
+
     # lets start screen stay up till button pressed
     def show_start_screen(self):
-            self.screen.fill(BGCOLOR)
-            self.draw_text(self.screen, "Press ANY button to start", 64, WHITE, 7, 10)
-            pg.display.flip()
-            self.wait_for_key()
+        self.screen.fill(BGCOLOR)
+        self.draw_text(self.screen, "Press ANY button to start", 64, WHITE, 7, 10)
+        pg.display.flip()
+        self.wait_for_key()
 
     # same for start screen just for death screen
     def show_death_screen(self):
-            self.screen.fill(BGCOLOR)
-            self.draw_text(self.screen, "Press ANY button to start AGAIN", 64, WHITE, 4.5, 10)
-            pg.display.flip()
-            self.wait_for_key_death()
+        self.screen.fill(BGCOLOR)
+        self.draw_text(self.screen, "Press ANY button to start AGAIN", 64, WHITE, 4.5, 10)
+        pg.display.flip()
+        self.wait_for_key_death()
 
     # same as those above
     def show_end_screen(self):
-            self.screen.fill(BGCOLOR)
-            self.draw_text(self.screen, "good job you beat this game", 64, WHITE, 6, 8)
-            self.draw_text(self.screen, "Press ANY button to start again", 64, RED, 5, 10)
-            pg.display.flip()
-            self.wait_for_key_death()
+        self.screen.fill(BGCOLOR)
+        self.draw_text(self.screen, "good job you beat this game", 64, WHITE, 6, 8)
+        self.draw_text(self.screen, "Press ANY button to start again", 64, RED, 5, 10)
+        pg.display.flip()
+        self.wait_for_key_death()
 
     # def what wait for key is and what actions to take
     def wait_for_key(self):
@@ -218,7 +283,7 @@ class Game:
                     self.draw_text(self.screen, "Clicking is NOT pressing a BUTTON", 64, RED, 3, 13)
                     pg.display.flip()
 
-     # def what wait for key is and what actions to take
+    # def what wait for key is and what actions to take
     def wait_for_key_death(self):
         waiting = True
         while waiting:
@@ -236,11 +301,15 @@ class Game:
                     self.draw_text(self.screen, "Clicking is NOT pressing a BUTTON", 64, RED, 3, 13)
                     pg.display.flip()
                 
-    # Lets you do events of movement/quiting
+    # Lets you do events of movement/quitting
     def events(self):
         for event in pg.event.get():
             if event.type == pg.QUIT:
                 self.quit()
+
+# Define the duration of each level (in seconds)
+LEVEL_DURATION = 300  # 5 minutes
+
 # def g as game
 g = Game()
 # use run method to start things
