@@ -4,30 +4,43 @@ from sprite import *  # Assuming sprite.py contains the sprite classes
 from os import path
 import sys
 
-# defines level files
+
+'''
+
+Realease virson idea, 
+get coins form beating levels and be able to use those coins to gamable
+
+'''
+
+
+# Import mixer module for playing sounds
+from pygame import mixer
+
+# defines levels
 LEVEL1 = "level1.txt"
 LEVEL2 = "level2.txt"
 LEVEL3 = "level3.txt"
 LEVEL4 = "level4.txt"
 
+# heart beat done by Chapt GPT
+mixer.init()
+heartbeat_sound = mixer.Sound(path.join('sounds', 'heartbeat.wav'))
+
 class Timer:
     def __init__(self):
-        self.current_time = 0
-        self.cd = 0
-        # Initialize the timer with 60 seconds
-        self.start_timer(60)
+        self.start_time = pg.time.get_ticks() / 1000  # Store the start time
+        self.remaining_time = 60  # Set the initial remaining time to 60 seconds
 
     def ticking(self):
-        self.current_time = pg.time.get_ticks() / 1000
-        if self.cd > 0:
-            self.cd -= 1  # Decrease timer by 1 second
+        elapsed_time = pg.time.get_ticks() / 1000 - self.start_time  # Calculate elapsed time
+        self.remaining_time = max(0, self.remaining_time - elapsed_time)  # Calculate remaining time
 
     def start_timer(self, duration):
-        self.cd = duration
+        self.remaining_time = duration
+        self.start_time = pg.time.get_ticks() / 1000  # Reset the start time
 
     def is_finished(self):
-        return self.cd <= 0
-
+        return self.remaining_time <= 0
 
 class Game:
     # Allows us to assign properties to the class
@@ -138,12 +151,16 @@ class Game:
                 if tile == "U":
                     Sideway(self, col, row)
 
-                
-    # def run
-        # def run
     def run(self):
         self.playing = True
         while self.playing:
+            # Calculate elapsed time since the last update
+            current_time = pg.time.get_ticks()
+            elapsed_time = (current_time - self.last_update) / 1000  # Convert to seconds
+
+            # Update the last update time
+            self.last_update = current_time
+
             # Set fps
             self.dt = self.clock.tick(FPS) / 1000
             self.events()
@@ -151,16 +168,19 @@ class Game:
             self.draw()
             self.reder_screen()
 
-            # Decrease display timer by 1 second
-            self.timer.cd -= self.dt
+            # Decrease display timer by elapsed time
+            self.timer.remaining_time -= elapsed_time
 
             # Check if the display timer has reached 0
-            if self.timer.cd <= 0:
-                # Reset the display timer to 0 to ensure it doesn't go negative
-                self.timer.cd = 0
+            if self.timer.remaining_time <= 0:
+                self.timer.remaining_time = 0  # Ensure the timer doesn't go negative
                 # Handle any actions when the timer reaches 0
 
-
+            # Play heartbeat sound
+            heartbeat_sound.set_volume(0.5)  # Adjust the volume as needed
+            heartbeat_rate = max(0.5, 1.0 - self.timer.remaining_time / 60.0)  # Heartbeat rate increases as time decreases
+            heartbeat_sound.set_rate(heartbeat_rate)
+            heartbeat_sound.play()
 
     # def quit so you can quit
     def quit(self):
@@ -202,13 +222,6 @@ class Game:
                 self.life_timer.start_timer(self.life_duration)
                 self.timer.start_timer(LEVEL_DURATION)
 
-        # Decrement the display timer by 1 for every 1000 milliseconds (1 second)
-        if not self.timer.is_finished():
-            self.timer.cd -= elapsed_time / 1000
-
-
-
-
     # Draws lines to form a grid
     def draw_grid(self):
         pass
@@ -228,10 +241,11 @@ class Game:
         BGCOLOR = (0 + 15*self.shield.death, 0, 0)
 
     # def draw for different events
+    # def draw for different events
     def draw(self):
         self.screen.fill(BGCOLOR)
         # Draw countdown timer in the top left corner
-        self.draw_text(self.screen, "Timer: {}".format(max(0, self.timer.cd)), 32, WHITE, 24, 1)
+        # Removed display of timer
         self.all_sprites.draw(self.screen)
         if self.shield.death == 1:
             self.draw_text(self.screen, "Imagine Dying " + str(self.shield.death) + " Time On Level " + str(self.current_level), 32, WHITE, 11, 1)
