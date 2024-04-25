@@ -22,9 +22,7 @@ LEVEL2 = "level2.txt"
 LEVEL3 = "level3.txt"
 LEVEL4 = "level4.txt"
 
-# heart beat done by Chapt GPT
-mixer.init()
-heartbeat_sound = mixer.Sound(path.join('sounds', 'heartbeat.wav'))
+
 
 class Timer:
     def __init__(self):
@@ -60,7 +58,7 @@ class Game:
         self.timer = Timer()
         self.shield_duration = 0  
         self.shield_active = False
-        self.life_duration = 1800  # 60 is about 2 second
+        self.life_duration = 20000  # 150 is about 1s second
         self.life_timer = Timer()
         self.life = 0
         # loads data
@@ -71,6 +69,11 @@ class Game:
     def load_data(self):
         self.game_folder = path.dirname(__file__)
         self.img_folder = path.join(self.game_folder, 'images')
+        # heart beat done by Chapt GPT
+        mixer.init()
+        self.snd_folder = path.join(self.game_folder, 'sounds')
+        global heartbeat_sound
+        heartbeat_sound = mixer.Sound(path.join(self.snd_folder, 'heartbeat.wav'))
         #    actually sprites
         self.mob_img = pg.image.load(path.join(self.img_folder, 'red_triangle.png.ico')).convert_alpha()
         self.circle_img = pg.image.load(path.join(self.img_folder, 'red_circle.png')).convert_alpha()
@@ -178,8 +181,8 @@ class Game:
 
             # Play heartbeat sound
             heartbeat_sound.set_volume(0.5)  # Adjust the volume as needed
-            heartbeat_rate = max(0.5, 1.0 - self.timer.remaining_time / 60.0)  # Heartbeat rate increases as time decreases
-            heartbeat_sound.set_rate(heartbeat_rate)
+            heartbeat_rate = max(60, 1.0 - self.timer.remaining_time)  # Heartbeat rate increases as time decreases
+            heartbeat_sound.set_volume(heartbeat_rate)  # Adjust volume based on remaining time
             heartbeat_sound.play()
 
     # def quit so you can quit
