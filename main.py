@@ -3,6 +3,7 @@ from settings import *  # Make sure all required constants are defined in settin
 from sprite import *  # Assuming sprite.py contains the sprite classes
 from os import path
 import sys
+import random
 
 
 '''
@@ -25,20 +26,20 @@ LEVEL4 = "level4.txt"
 
 
 class Timer:
-    def __init__(self):
-        self.start_time = pg.time.get_ticks() / 1000  # Store the start time
-        self.remaining_time = 60  # Set the initial remaining time to 60 seconds
+    def __init__(self, duration_ms=60000):
+        self.duration = duration_ms
+        self.start_time = pg.time.get_ticks()  # Store the start time in milliseconds
 
     def ticking(self):
-        elapsed_time = pg.time.get_ticks() / 1000 - self.start_time  # Calculate elapsed time
-        self.remaining_time = max(0, self.remaining_time - elapsed_time)  # Calculate remaining time
+        elapsed_time = pg.time.get_ticks() - self.start_time  # Calculate elapsed time
+        self.remaining_time = max(0, self.duration - elapsed_time)  # Calculate remaining time
 
-    def start_timer(self, duration):
-        self.remaining_time = duration
-        self.start_time = pg.time.get_ticks() / 1000  # Reset the start time
+    def start_timer(self):
+        self.start_time = pg.time.get_ticks()  # Reset the start time
 
     def is_finished(self):
         return self.remaining_time <= 0
+
 
 class Game:
     # Allows us to assign properties to the class
@@ -56,6 +57,7 @@ class Game:
         self.clock = pg.time.Clock()
         # game clock
         self.timer = Timer()
+        self.timer.start_timer()
         self.shield_duration = 0  
         self.shield_active = False
         self.life_duration = 20000  # 150 is about 1s second
@@ -104,7 +106,7 @@ class Game:
                 if tile == 'U':
                     Sideway(self, col, row)
         # Reset the timer when changing levels
-        self.timer.start_timer(LEVEL_DURATION)
+        self.timer.start_timer()  # Remove the argument from here
         # Check if the current level is level 3
         self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
         # Incrementing the current level should come after setting the spawn point
@@ -125,10 +127,10 @@ class Game:
         # gives player a spawn point
         self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
         # player timer
-        self.timer.start_timer(60)  # Start the timer at 60 seconds
+        self.timer.start_timer()  # Start the timer without any arguments
         self.shield_active = True
         # life timer
-        self.life_timer.start_timer(self.life_duration)
+        self.life_timer.start_timer()  # Start the life timer without any arguments
         # Set self.life after shield initialization
         self.life = self.shield.life
         # load classes
@@ -153,6 +155,30 @@ class Game:
                     Mob(self, col, row)
                 if tile == "U":
                     Sideway(self, col, row)
+
+
+
+    def after_level_complete(self):
+    # Define a list of possible random events
+        random_events = [
+            self.increase_life,
+            self.increase_life_duration 
+        # Add more random events as needed
+    ]
+
+        # Choose a random event from the list and execute it
+        random_event = random.choice(random_events)
+        random_event()  # Call the chosen method
+
+    def increase_life(self):
+        # Implement the logic to increase life here
+        self.shield.life += 1
+        print("Life increased by 1")
+
+    def increase_life_duration(self):
+            # Implement the second random event here
+            self.life_duration += 10000
+            print("Time is now 30 seconds longer")
 
     def run(self):
         self.playing = True
@@ -200,10 +226,13 @@ class Game:
         if self.shield.gem == 2:
             if self.current_level == 1:
                 self.change_level(LEVEL2)
+                self.after_level_complete()
             elif self.current_level == 2:
                 self.change_level(LEVEL3)
+                self.after_level_complete()
             elif self.current_level == 3:
                 self.change_level(LEVEL4)
+                self.after_level_complete()
             else:
                 # Handle end of the game or additional levels
                 self.playing = False
