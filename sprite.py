@@ -6,6 +6,7 @@ from random import randint
 from math import floor
 from pygame.sprite import Sprite
 from os import path
+import random
 
 
 dir = path.dirname(__file__)
@@ -47,6 +48,10 @@ class Shield(pg.sprite.Sprite):
             self.death = 0
             self.life = 10
             self.end = 0
+            self.coins = 0
+            self.max_life = 10  # Initial maximum life
+            self.life = self.max_life  # Set current life to maximum initially
+
     
     def respawn(self):
         # Set player's position to a respawn point
@@ -174,6 +179,8 @@ class Shield(pg.sprite.Sprite):
             self.quit
         if self.collide_with_group(self.game.sideways, True):
             self.quit
+        if self.life > self.max_life:
+            self.life = self.max_life
 
                     
 
@@ -315,3 +322,71 @@ class Timer():
 class ShieldTimer(Timer):
     def __init__(self):
         super().__init__()
+
+class Shop:
+    def __init__(self, game):
+        self.game = game
+        self.screen = pg.display.set_mode((WIDTH, HEIGHT))
+        # Add other attributes and items for sale as needed
+    
+    def draw_text(self, surface, text, size, color, x, y):
+        font_name = pg.font.match_font('arial')
+        font = pg.font.Font(font_name, size)
+        text_surface = font.render(text, True, color)
+        text_rect = text_surface.get_rect()
+        text_rect.topleft = (x, y)
+        surface.blit(text_surface, text_rect)
+
+    def shop_items(self, item):
+        random_events = [
+            self.increase_life_item,
+            self.increase_life_duration_item 
+            # Add more random events as needed
+        ]
+        # Choose a random event from the list and execute it
+        random_event = random.choice(random_events)
+        random_event()  # Call the chosen method
+    
+    def increase_life_item(self):
+            self.game.shield.max_life += 1
+            print("Life increased by 1")
+
+    def increase_life_duration_item(self):
+        # Implement the second random event here
+        self.game.life_duration += 10000
+        print("Time is now 30 seconds longer")
+    
+    def draw(self):
+        self.screen.fill(BGCOLOR)
+        self.draw_text(self.screen, "Welcome to the Shop!", 64, WHITE, 100, 100)
+        self.draw_text(self.screen, "Press 1 to purchase life increase item", 32, WHITE, 100, 200)
+        self.draw_text(self.screen, "Press 2 to purchase life duration increase item", 32, WHITE, 100, 250)
+        # Add more items and descriptions as needed
+        pg.display.flip()
+    
+    def show_shop_screen(self):
+        self.draw()  # Draw the shop screen
+        self.wait_for_key()  # Wait for key press
+
+    # def what wait for key is and what actions to take
+    def wait_for_key(self):
+        waiting = True
+        while waiting:
+            self.game.clock.tick(FPS)
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    waiting = False
+                    self.game.quit()
+                if event.type == pg.KEYDOWN:
+                    if event.key == pg.K_1:
+                        self.purchase_item("life_increase")  # Placeholder, implement logic
+                    elif event.key == pg.K_2:
+                        self.purchase_item("life_duration_increase")  # Placeholder, implement logic
+                    waiting = False
+                if event.type == pg.MOUSEBUTTONDOWN:
+                    self.draw_text(self.screen, "Clicking is NOT pressing a BUTTON", 64, RED, 3, 13)
+                    pg.display.flip()
+    
+    def purchase_item(self, item):
+        # Placeholder for logic to handle purchasing items
+        print("Item purchased:", item)

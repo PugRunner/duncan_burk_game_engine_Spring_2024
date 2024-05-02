@@ -9,7 +9,7 @@ import random
 '''
 
 Realease virson idea, 
-get coins form beating levels and be able to use those coins to gamable
+get coins form beating levels and be able to use those coins to shop
 
 '''
 
@@ -45,28 +45,28 @@ class Game:
     # Allows us to assign properties to the class
     def __init__(self):
         # makes it so that first level is 1 so that code easier to keep track of level
-        self.current_level = 1
-        # initialize the last update time
-        self.last_update = pg.time.get_ticks()
-        #  initialize pygame
-        pg.init()
-        # When run, create a screen with the widths from settings and height from settings and called "Title" from settings.
-        self.screen = pg.display.set_mode((WIDTH, HEIGHT))
-        pg.display.set_caption(TITLE)
-        # setting Game Clock
-        self.clock = pg.time.Clock()
-        # game clock
-        self.timer = Timer()
-        self.timer.start_timer()
-        self.shield_duration = 0  
-        self.shield_active = False
-        self.life_duration = 20000  # 150 is about 1s second
-        self.life_timer = Timer()
-        self.life = 0
-        # loads data
-        self.load_data()
-        # defines data for leel 1 file
-        self.last_update = pg.time.get_ticks()  # Initialize last_update here
+            self.current_level = 1
+            # initialize the last update time
+            self.last_update = pg.time.get_ticks()
+            #  initialize pygame
+            pg.init()
+            # When run, create a screen with the widths from settings and height from settings and called "Title" from settings.
+            self.screen = pg.display.set_mode((WIDTH, HEIGHT))  # Set the display mode here
+            pg.display.set_caption(TITLE)
+            # setting Game Clock
+            self.clock = pg.time.Clock()
+            # game clock
+            self.timer = Timer()
+            self.timer.start_timer()
+            self.shield_duration = 0  
+            self.shield_active = False
+            self.life_duration = 20000  # 150 is about 1s second
+            self.life_timer = Timer()
+            self.life = 0
+            # loads data
+            self.load_data()
+            # defines data for leel 1 file
+            self.last_update = pg.time.get_ticks()  # Initialize last_update here
 
     def load_data(self):
         self.game_folder = path.dirname(__file__)
@@ -133,6 +133,7 @@ class Game:
         self.life_timer.start_timer()  # Start the life timer without any arguments
         # Set self.life after shield initialization
         self.life = self.shield.life
+        self.shop = Shop(self)
         # load classes
         for row, tiles in enumerate(self.map_data):
             print(row)
@@ -160,25 +161,9 @@ class Game:
 
     def after_level_complete(self):
     # Define a list of possible random events
-        random_events = [
-            self.increase_life,
-            self.increase_life_duration 
-        # Add more random events as needed
-    ]
+        self.shield.coins += 1
+        self.shop.show_shop_screen()
 
-        # Choose a random event from the list and execute it
-        random_event = random.choice(random_events)
-        random_event()  # Call the chosen method
-
-    def increase_life(self):
-        # Implement the logic to increase life here
-        self.shield.life += 1
-        print("Life increased by 1")
-
-    def increase_life_duration(self):
-            # Implement the second random event here
-            self.life_duration += 10000
-            print("Time is now 30 seconds longer")
 
     def run(self):
         self.playing = True
