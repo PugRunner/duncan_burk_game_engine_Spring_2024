@@ -1,91 +1,75 @@
+import os
+import json
 import pygame as pg
-from settings import *  # Make sure all required constants are defined in settings.py
-from sprite import *  # Assuming sprite.py contains the sprite classes
+from settings import *
 from os import path
 import sys
-import random
+from sprite import *
+print("Current working directory:", os.getcwd())
 
-
-'''
-
-Realease virson idea, 
-get coins form beating levels and be able to use those coins to shop
-
-'''
 
 
 # Import mixer module for playing sounds
 from pygame import mixer
 
-# defines levels
+# Define level filenames as constants
 LEVEL1 = "level1.txt"
 LEVEL2 = "level2.txt"
 LEVEL3 = "level3.txt"
 LEVEL4 = "level4.txt"
 
 
-
 class Timer:
     def __init__(self, duration_ms=60000):
         self.duration = duration_ms
-        self.start_time = pg.time.get_ticks()  # Store the start time in milliseconds
-
-    def ticking(self):
-        elapsed_time = pg.time.get_ticks() - self.start_time  # Calculate elapsed time
-        self.remaining_time = max(0, self.duration - elapsed_time)  # Calculate remaining time
+        self.start_time = None
 
     def start_timer(self):
-        self.start_time = pg.time.get_ticks()  # Reset the start time
+        self.start_time = pg.time.get_ticks()
+
+    def ticking(self):
+        if self.start_time is not None:
+            elapsed_time = pg.time.get_ticks() - self.start_time
+            self.remaining_time = max(0, self.duration - elapsed_time)
 
     def is_finished(self):
         return self.remaining_time <= 0
 
-
 class Game:
-    # Allows us to assign properties to the class
     def __init__(self):
-        # makes it so that first level is 1 so that code easier to keep track of level
-            self.current_level = 1
-            # initialize the last update time
-            self.last_update = pg.time.get_ticks()
-            #  initialize pygame
-            pg.init()
-            # When run, create a screen with the widths from settings and height from settings and called "Title" from settings.
-            self.screen = pg.display.set_mode((WIDTH, HEIGHT))  # Set the display mode here
-            pg.display.set_caption(TITLE)
-            # setting Game Clock
-            self.clock = pg.time.Clock()
-            # game clock
-            self.timer = Timer()
-            self.timer.start_timer()
-            self.shield_duration = 0  
-            self.shield_active = False
-            self.life_duration = 20000  # 150 is about 1s second
-            self.life_timer = Timer()
-            self.life = 0
-            # loads data
-            self.load_data()
-            # defines data for leel 1 file
-            self.last_update = pg.time.get_ticks()  # Initialize last_update here
+        self.current_level = 1
+        self.last_update = pg.time.get_ticks()  # Initialize last_update with current time
+        pg.init()
+        self.screen = pg.display.set_mode((WIDTH, HEIGHT))
+        pg.display.set_caption(TITLE)
+        self.clock = pg.time.Clock()
+        self.timer = Timer(LEVEL_DURATION * 1000)
+        self.shield_duration = 0  
+        self.shield_active = False
+        self.life_duration = 20000
+        self.life_timer = Timer()
+        self.life = 0
+        self.shield = None  # Initialize shield attribute
+        global MAX_LIFE
+        MAX_LIFE = 100
+        self.player_data_file = "player_data.json"
+        self.load_data()  # Move load_data method call to the end
+        self.load_player_data()  # Call load_player_data after shield is initialized
 
     def load_data(self):
         self.game_folder = path.dirname(__file__)
         self.img_folder = path.join(self.game_folder, 'images')
-        # heart beat done by Chapt GPT
         mixer.init()
         self.snd_folder = path.join(self.game_folder, 'sounds')
         global heartbeat_sound
         heartbeat_sound = mixer.Sound(path.join(self.snd_folder, 'heartbeat.wav'))
-        #    actually sprites
         self.mob_img = pg.image.load(path.join(self.img_folder, 'red_triangle.png.ico')).convert_alpha()
         self.circle_img = pg.image.load(path.join(self.img_folder, 'red_circle.png')).convert_alpha()
         self.map_data = []
         with open(path.join(self.game_folder, LEVEL1), 'rt') as f:
             for line in f:
-                print(line)
                 self.map_data.append(line)
 
-    # def way to change level
     def change_level(self, lvl):
         for s in self.all_sprites:
             s.kill()
@@ -105,16 +89,11 @@ class Game:
                     Mob(self, col, row)
                 if tile == 'U':
                     Sideway(self, col, row)
-        # Reset the timer when changing levels
-        self.timer.start_timer()  # Remove the argument from here
-        # Check if the current level is level 3
+        self.timer.start_timer()
         self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
-        # Incrementing the current level should come after setting the spawn point
         self.current_level += 1
 
-    # Create run method which runs the whole GAME
     def new(self):
-        # loads all sprites
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
         self.gems = pg.sprite.Group()
@@ -124,23 +103,15 @@ class Game:
         self.dones = pg.sprite.Group()
         self.mobs = pg.sprite.Group()
         self.sideways = pg.sprite.Group()
-        # gives player a spawn point
         self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
-        # player timer
-        self.timer.start_timer()  # Start the timer without any arguments
+        self.timer.start_timer()
         self.shield_active = True
-        # life timer
-        self.life_timer.start_timer()  # Start the life timer without any arguments
-        # Set self.life after shield initialization
+        self.life_timer.start_timer()
         self.life = self.shield.life
         self.shop = Shop(self)
-        # load classes
         for row, tiles in enumerate(self.map_data):
-            print(row)
             for col, tile in enumerate(tiles):
-                print(col)
                 if tile == '1':
-                    print("a wall at", row, col)
                     Wall(self, col, row)
                 if tile == 'G':
                     Gem(self, col, row)
@@ -157,56 +128,67 @@ class Game:
                 if tile == "U":
                     Sideway(self, col, row)
 
-
-
     def after_level_complete(self):
-    # Define a list of possible random events
         self.shield.coins += 1
         self.shop.show_shop_screen()
-
 
     def run(self):
         self.playing = True
         while self.playing:
-            # Calculate elapsed time since the last update
             current_time = pg.time.get_ticks()
-            elapsed_time = (current_time - self.last_update) / 1000  # Convert to seconds
-
-            # Update the last update time
+            elapsed_time = (current_time - self.last_update) / 1000
             self.last_update = current_time
-
-            # Set fps
             self.dt = self.clock.tick(FPS) / 1000
             self.events()
             self.update()
             self.draw()
             self.reder_screen()
-
-            # Decrease display timer by elapsed time
-            self.timer.remaining_time -= elapsed_time
-
-            # Check if the display timer has reached 0
-            if self.timer.remaining_time <= 0:
-                self.timer.remaining_time = 0  # Ensure the timer doesn't go negative
-                # Handle any actions when the timer reaches 0
-
-            # Play heartbeat sound
-            heartbeat_sound.set_volume(0.5)  # Adjust the volume as needed
-            heartbeat_rate = max(60, 1.0 - self.timer.remaining_time)  # Heartbeat rate increases as time decreases
-            heartbeat_sound.set_volume(heartbeat_rate)  # Adjust volume based on remaining time
+            self.timer.ticking()
+            if self.timer.is_finished():
+                self.timer.remaining_time = 0
+            heartbeat_sound.set_volume(0.5)
+            heartbeat_rate = max(60, 1.0 - self.timer.remaining_time)
+            heartbeat_sound.set_volume(heartbeat_rate)
             heartbeat_sound.play()
 
-    # def quit so you can quit
     def quit(self):
         pg.quit()
         sys.exit()
 
-    # def updates in game 
+    def load_player_data(self):
+        try:
+            with open(self.player_data_file, "r") as f:
+                player_data = json.load(f)
+                if self.shield is not None:  # Check if shield exists
+                    self.shield.max_life = player_data.get("max_life", 100)  # Default max life is 100
+        except FileNotFoundError:
+            print(f"Player data file '{self.player_data_file}' not found.")
+
+
+    def save_player_data(self):
+        player_data = {"MAX_LEVEL": self.shield.max_life}
+        with open(self.player_data_file, "w") as f:
+            json.dump(player_data, f)
+
+    def purchase_item(self, item):
+        # Logic for purchasing items
+        if item == "life_increase":
+            if self.shield.coins >= 10 and self.shield.max_life < MAX_LIFE: 
+                self.shield.max_life += 1
+                self.shield.life += 1 
+                self.shield.coins -= 10
+                # Save player data after increasing maximum life
+                self.save_player_data()
+                return True  # Return True if item was successfully purchased
+            else:
+                return False  # Return False if max life is already reached or coins are insufficient
+        else:
+            # Handle other items or invalid item names
+            return False  # Return False if item purchase failed or invalid item named
+
     def update(self):
-        # Calculate the elapsed time since the last update call
         elapsed_time = pg.time.get_ticks() - self.last_update
         self.last_update = pg.time.get_ticks()
-
         self.all_sprites.update()
         if self.shield.gem == 2:
             if self.current_level == 1:
@@ -219,7 +201,6 @@ class Game:
                 self.change_level(LEVEL4)
                 self.after_level_complete()
             else:
-                # Handle end of the game or additional levels
                 self.playing = False
         if self.shield.life == 0:
             self.show_death_screen()
@@ -229,21 +210,24 @@ class Game:
             self.timer.ticking()
             if self.timer.is_finished():
                 self.shield_active = False
-                # Start life timer when shield expires
                 self.life_timer.start_timer(self.life_duration)
         else:
             self.life_timer.ticking()
             if self.life_timer.is_finished():
                 self.shield.life -= 10
-                # Restart life timer and shield timer when a life is lost
                 self.life_timer.start_timer(self.life_duration)
                 self.timer.start_timer(LEVEL_DURATION)
+        if self.purchase_item("life_increase"):
+            # Check if player hasn't reached the max life already
+            if self.shield.max_life < MAX_LIFE:
+                # Increase both current and max life
+                self.shield.max_life += 1
+                self.shield.life += 1
 
-    # Draws lines to form a grid
+
     def draw_grid(self):
         pass
 
-    # def text font
     def draw_text(self, surface, text, size, color, x, y):
         font_name = pg.font.match_font('arial')
         font = pg.font.Font(font_name, size)
@@ -252,17 +236,12 @@ class Game:
         text_rect.topleft = (x*TILESIZE,y*TILESIZE)
         surface.blit(text_surface, text_rect)
 
-    # makes screen render when player dies
     def reder_screen(self):
         global BGCOLOR
         BGCOLOR = (0 + 15*self.shield.death, 0, 0)
 
-    # def draw for different events
-    # def draw for different events
     def draw(self):
         self.screen.fill(BGCOLOR)
-        # Draw countdown timer in the top left corner
-        # Removed display of timer
         self.all_sprites.draw(self.screen)
         if self.shield.death == 1:
             self.draw_text(self.screen, "Imagine Dying " + str(self.shield.death) + " Time On Level " + str(self.current_level), 32, WHITE, 11, 1)
@@ -273,25 +252,21 @@ class Game:
         if self.shield.life > 1:
             self.draw_text(self.screen, str(self.shield.life) + " Lives Left", 32, WHITE, 1, 1)
         if self.shield_active:
-            # Draw shield UI or anything related to an active shield
             pass
         pg.display.flip()
 
-    # lets start screen stay up till button pressed
     def show_start_screen(self):
         self.screen.fill(BGCOLOR)
         self.draw_text(self.screen, "Press ANY button to start", 64, WHITE, 7, 10)
         pg.display.flip()
         self.wait_for_key()
 
-    # same for start screen just for death screen
     def show_death_screen(self):
         self.screen.fill(BGCOLOR)
         self.draw_text(self.screen, "Press ANY button to start AGAIN", 64, WHITE, 4.5, 10)
         pg.display.flip()
         self.wait_for_key_death()
 
-    # same as those above
     def show_end_screen(self):
         self.screen.fill(BGCOLOR)
         self.draw_text(self.screen, "good job you beat this game", 64, WHITE, 6, 8)
@@ -299,7 +274,6 @@ class Game:
         pg.display.flip()
         self.wait_for_key_death()
 
-    # def what wait for key is and what actions to take
     def wait_for_key(self):
         waiting = True
         while waiting:
@@ -314,7 +288,6 @@ class Game:
                     self.draw_text(self.screen, "Clicking is NOT pressing a BUTTON", 64, RED, 3, 13)
                     pg.display.flip()
 
-    # def what wait for key is and what actions to take
     def wait_for_key_death(self):
         waiting = True
         while waiting:
@@ -327,12 +300,11 @@ class Game:
                     waiting = False
                     self.change_level(LEVEL1)
                     self.current_level = 1
-                    self.new()  # Start a new game
+                    self.new()
                 if event.type == pg.MOUSEBUTTONDOWN:
                     self.draw_text(self.screen, "Clicking is NOT pressing a BUTTON", 64, RED, 3, 13)
                     pg.display.flip()
-                
-    # Lets you do events of movement/quitting
+
     def events(self):
         for event in pg.event.get():
             if event.type == pg.QUIT:
@@ -341,11 +313,8 @@ class Game:
 # Define the duration of each level (in seconds)
 LEVEL_DURATION = 300  # 5 minutes
 
-# def g as game
 g = Game()
-# use run method to start things
 g.show_start_screen()
 while True:
     g.new()
     g.run()
-    # g.show_go_screen()

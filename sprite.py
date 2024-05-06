@@ -48,7 +48,7 @@ class Shield(pg.sprite.Sprite):
             self.death = 0
             self.life = 10
             self.end = 0
-            self.coins = 0
+            self.coins = 10
             self.max_life = 10  # Initial maximum life
             self.life = self.max_life  # Set current life to maximum initially
 
@@ -166,6 +166,7 @@ class Shield(pg.sprite.Sprite):
         if self.collide_with_group(self.game.gems, True):
             # gives player more gem
             self.gem += 1
+            self.coins += 10
         if self.collide_with_group(self.game.power_ups, True):
                     # makes player bigger
                     global PlayerSize
@@ -181,6 +182,7 @@ class Shield(pg.sprite.Sprite):
             self.quit
         if self.life > self.max_life:
             self.life = self.max_life
+        
 
                     
 
