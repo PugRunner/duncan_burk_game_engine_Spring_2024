@@ -267,7 +267,7 @@ class Mob(pg.sprite.Sprite):
         self.image = pg.transform.rotate(self.image, -180)
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
-        self.vy = 15
+        self.vy = ENEMY_SPEED
 
     def update(self):
         self.rect.y += self.vy
@@ -288,7 +288,7 @@ class Sideway(pg.sprite.Sprite):
         self.image = pg.transform.rotate(self.image, -90)
         self.rect.x = x * TILESIZE
         self.rect.y = y * TILESIZE
-        self.vx = 15
+        self.vx = ENEMY_SPEED
 
     def update(self):
         self.rect.x += self.vx
@@ -362,12 +362,12 @@ class Shop:
     def increase_mob_speed_potation(self):
         # Implement the second random event here
         global ENEMY_SPEED
-        ENEMY_SPEED = 250
+        ENEMY_SPEED = 25
 
     def increase_player_speed_potation(self):
         # Implement the second random event here
         global PLAYER_SPEED
-        PLAYER_SPEED = 2500
+        PLAYER_SPEED = 500
     
     
     def draw(self):
@@ -424,6 +424,12 @@ class Shop:
             # Implement logic for increasing life duration
             self.game.life_duration += 10000  # Increase life duration by 10 seconds
             return True  # Return True if item was successfully purchased
+        elif item == "mob_speed_potation":
+            self.increase_mob_speed_potation()  # Call the method to increase mob speed
+            return True
+        elif item == "player_speed_potation":
+            self.increase_player_speed_potation()  # Call the method to increase player speed
+            return True
         else:
             # Handle other items or invalid item names
             return False  # Return False if item purchase failed or invalid item named

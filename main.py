@@ -166,6 +166,8 @@ class Game:
                 self.shield.max_life += 1
                 self.shield.life += 1 
                 self.shield.coins -= 10
+                # Update the 'life' variable
+                self.life = self.shield.life
                 # Save player data after increasing maximum life
                 self.save_player_data()
                 return True  # Return True if item was successfully purchased
@@ -191,12 +193,12 @@ class Game:
     def increase_mob_speed_potation(self):
         # Implement the second random event here
         global ENEMY_SPEED
-        ENEMY_SPEED = 250
+        ENEMY_SPEED = 25
 
     def increase_player_speed_potation(self):
         # Implement the second random event here
         global PLAYER_SPEED
-        PLAYER_SPEED = 2500
+        PLAYER_SPEED = 500
 
 
     def save_player_data(self):
@@ -248,10 +250,10 @@ class Game:
             self.life_duration += 10000
         if self.purchase_item("mob_speed_potation"):
             global ENEMY_SPEED
-            ENEMY_SPEED = 250
+            ENEMY_SPEED = 30
         if self.purchase_item("player_speed_potation"):
             global PLAYER_SPEED
-            PLAYER_SPEED = 2500
+            PLAYER_SPEED = 500
 
 
     def draw_grid(self):
