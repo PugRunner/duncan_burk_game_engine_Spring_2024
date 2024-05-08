@@ -13,6 +13,7 @@ dir = path.dirname(__file__)
 img_dir = path.join(dir,'images')
 SPRITESHEET = "theBell.png"
 
+
 # def Spritesheet to use for animations
 class Spritesheet:
     # utility class for loading and parsing spritesheets
@@ -48,7 +49,7 @@ class Shield(pg.sprite.Sprite):
             self.death = 0
             self.life = 10
             self.end = 0
-            self.coins = 10
+            self.coins = 99
             self.max_life = 10  # Initial maximum life
             self.life = self.max_life  # Set current life to maximum initially
 
@@ -357,12 +358,25 @@ class Shop:
         # Implement the second random event here
         self.game.life_duration += 10000
         print("Time is now 30 seconds longer")
+
+    def increase_mob_speed_potation(self):
+        # Implement the second random event here
+        global ENEMY_SPEED
+        ENEMY_SPEED = 250
+
+    def increase_player_speed_potation(self):
+        # Implement the second random event here
+        global PLAYER_SPEED
+        PLAYER_SPEED = 2500
+    
     
     def draw(self):
         self.screen.fill(BGCOLOR)
         self.draw_text(self.screen, "Welcome to the Shop!", 64, WHITE, 100, 100)
         self.draw_text(self.screen, "Press 1 to purchase life increase item", 32, WHITE, 100, 200)
         self.draw_text(self.screen, "Press 2 to purchase life duration increase item", 32, WHITE, 100, 250)
+        self.draw_text(self.screen, "Press 3 to purchase mob speed increase item", 32, WHITE, 100, 300)
+        self.draw_text(self.screen, "Press 4 to purchase player speed increase item", 32, WHITE, 100, 350)
         # Add more items and descriptions as needed
         pg.display.flip()
     
@@ -382,13 +396,36 @@ class Shop:
                 if event.type == pg.KEYDOWN:
                     if event.key == pg.K_1:
                         self.purchase_item("life_increase")  # Placeholder, implement logic
+                        self.game.shield.life += 1
                     elif event.key == pg.K_2:
                         self.purchase_item("life_duration_increase")  # Placeholder, implement logic
+                    elif event.key == pg.K_3:
+                        self.purchase_item("mob_speed_potation")  # Placeholder, implement logic
+                    elif event.key == pg.K_4:
+                        self.purchase_item("player_speed_potation")  # Placeholder, implement logic
                     waiting = False
                 if event.type == pg.MOUSEBUTTONDOWN:
                     self.draw_text(self.screen, "Clicking is NOT pressing a BUTTON", 64, RED, 3, 13)
                     pg.display.flip()
     
     def purchase_item(self, item):
-        # Placeholder for logic to handle purchasing items
-        print("Item purchased:", item)
+        # Logic for purchasing items
+        if item == "life_increase":
+            if self.game.shield.coins >= 10: 
+                self.game.shield.max_life += 1
+                self.game.shield.life += 1 
+                self.game.shield.coins -= 10
+                # Save player data after increasing maximum life
+                self.game.save_player_data()
+                return True  # Return True if item was successfully purchased
+            else:
+                return False  # Return False if max life is already reached or coins are insufficient
+        elif item == "life_duration_increase":
+            # Implement logic for increasing life duration
+            self.game.life_duration += 10000  # Increase life duration by 10 seconds
+            return True  # Return True if item was successfully purchased
+        else:
+            # Handle other items or invalid item names
+            return False  # Return False if item purchase failed or invalid item named
+
+

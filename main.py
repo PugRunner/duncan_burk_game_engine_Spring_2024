@@ -50,11 +50,20 @@ class Game:
         self.life_timer = Timer()
         self.life = 0
         self.shield = None  # Initialize shield attribute
-        global MAX_LIFE
-        MAX_LIFE = 100
+        global max_life
+        max_life = 10  # Adjust starting max life to 10
         self.player_data_file = "player_data.json"
-        self.load_data()  # Move load_data method call to the end
         self.load_player_data()  # Call load_player_data after shield is initialized
+        self.load_data()  # Move load_data method call to after load_player_data
+
+    def load_player_data(self):
+        try:
+            with open(self.player_data_file, "r") as f:
+                player_data = json.load(f)
+                if self.shield is not None:  # Check if shield exists
+                    self.shield.max_life = player_data.get("max_life", 10)  # Default max life is 10
+        except FileNotFoundError:
+            print(f"Player data file '{self.player_data_file}' not found.")
 
     def load_data(self):
         self.game_folder = path.dirname(__file__)
@@ -69,30 +78,6 @@ class Game:
         with open(path.join(self.game_folder, LEVEL1), 'rt') as f:
             for line in f:
                 self.map_data.append(line)
-
-    def change_level(self, lvl):
-        for s in self.all_sprites:
-            s.kill()
-        self.map_data = []
-        with open(path.join(self.game_folder, lvl), 'rt') as f:
-            for line in f:
-                self.map_data.append(line.strip())
-        for row, tiles in enumerate(self.map_data):
-            for col, tile in enumerate(tiles):
-                if tile == '1':
-                    Wall(self, col, row)
-                if tile == 'd':
-                    Done(self, col, row)
-                if tile == 'G':
-                    Gem(self, col, row)
-                if tile == 'M':
-                    Mob(self, col, row)
-                if tile == 'U':
-                    Sideway(self, col, row)
-        self.timer.start_timer()
-        self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
-        self.current_level += 1
-
     def new(self):
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
@@ -128,10 +113,6 @@ class Game:
                 if tile == "U":
                     Sideway(self, col, row)
 
-    def after_level_complete(self):
-        self.shield.coins += 1
-        self.shop.show_shop_screen()
-
     def run(self):
         self.playing = True
         while self.playing:
@@ -150,30 +131,38 @@ class Game:
             heartbeat_rate = max(60, 1.0 - self.timer.remaining_time)
             heartbeat_sound.set_volume(heartbeat_rate)
             heartbeat_sound.play()
+            
+    def change_level(self, lvl):
+        for s in self.all_sprites:
+            s.kill()
+        self.map_data = []
+        with open(path.join(self.game_folder, lvl), 'rt') as f:
+            for line in f:
+                self.map_data.append(line.strip())
+        for row, tiles in enumerate(self.map_data):
+            for col, tile in enumerate(tiles):
+                if tile == '1':
+                    Wall(self, col, row)
+                if tile == 'd':
+                    Done(self, col, row)
+                if tile == 'G':
+                    Gem(self, col, row)
+                if tile == 'M':
+                    Mob(self, col, row)
+                if tile == 'U':
+                    Sideway(self, col, row)
+        self.timer.start_timer()
+        self.shield = Shield(self, RESPAWN_X, RESPAWN_Y)
+        self.current_level += 1
 
-    def quit(self):
-        pg.quit()
-        sys.exit()
-
-    def load_player_data(self):
-        try:
-            with open(self.player_data_file, "r") as f:
-                player_data = json.load(f)
-                if self.shield is not None:  # Check if shield exists
-                    self.shield.max_life = player_data.get("max_life", 100)  # Default max life is 100
-        except FileNotFoundError:
-            print(f"Player data file '{self.player_data_file}' not found.")
-
-
-    def save_player_data(self):
-        player_data = {"MAX_LEVEL": self.shield.max_life}
-        with open(self.player_data_file, "w") as f:
-            json.dump(player_data, f)
+    def after_level_complete(self):
+        self.shield.coins += 1
+        self.shop.show_shop_screen()
 
     def purchase_item(self, item):
-        # Logic for purchasing items
+        # Logic for purchasing items...
         if item == "life_increase":
-            if self.shield.coins >= 10 and self.shield.max_life < MAX_LIFE: 
+            if self.shield.coins >= 10: 
                 self.shield.max_life += 1
                 self.shield.life += 1 
                 self.shield.coins -= 10
@@ -182,9 +171,42 @@ class Game:
                 return True  # Return True if item was successfully purchased
             else:
                 return False  # Return False if max life is already reached or coins are insufficient
+        elif item == "life_duration_increase":
+            # Implement logic for increasing life duration
+            self.life_duration += 10000  # Increase life duration by 10 seconds
+            return True  # Return True if item was successfully purchased
+        elif item == "mob_speed_potation":
+            self.increase_mob_speed_potation()  # Call the method to increase mob speed
+            return True
+        elif item == "player_speed_potation":
+            self.increase_player_speed_potation()  # Call the method to increase player speed
+            return True
         else:
             # Handle other items or invalid item names
             return False  # Return False if item purchase failed or invalid item named
+
+
+        
+        
+    def increase_mob_speed_potation(self):
+        # Implement the second random event here
+        global ENEMY_SPEED
+        ENEMY_SPEED = 250
+
+    def increase_player_speed_potation(self):
+        # Implement the second random event here
+        global PLAYER_SPEED
+        PLAYER_SPEED = 2500
+
+
+    def save_player_data(self):
+        player_data = {"max_life": self.shield.max_life}
+        with open(self.player_data_file, "w") as f:
+            json.dump(player_data, f)
+
+
+    
+
 
     def update(self):
         elapsed_time = pg.time.get_ticks() - self.last_update
@@ -219,10 +241,17 @@ class Game:
                 self.timer.start_timer(LEVEL_DURATION)
         if self.purchase_item("life_increase"):
             # Check if player hasn't reached the max life already
-            if self.shield.max_life < MAX_LIFE:
-                # Increase both current and max life
-                self.shield.max_life += 1
-                self.shield.life += 1
+            self.shield.life += 1
+            if self.shield.life > self.shield.max_life:  # Access max_life from Shield object
+                self.shield.life = self.shield.max_life
+        if self.purchase_item("life_duration_increase"):
+            self.life_duration += 10000
+        if self.purchase_item("mob_speed_potation"):
+            global ENEMY_SPEED
+            ENEMY_SPEED = 250
+        if self.purchase_item("player_speed_potation"):
+            global PLAYER_SPEED
+            PLAYER_SPEED = 2500
 
 
     def draw_grid(self):
