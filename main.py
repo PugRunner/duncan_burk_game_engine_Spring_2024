@@ -18,6 +18,9 @@ LEVEL2 = "level2.txt"
 LEVEL3 = "level3.txt"
 LEVEL4 = "level4.txt"
 
+ENEMY_SPEED = 15
+PLAYER_SPEED = 200
+
 
 class Timer:
     def __init__(self, duration_ms=60000):
@@ -173,19 +176,28 @@ class Game:
                 return True  # Return True if item was successfully purchased
             else:
                 return False  # Return False if max life is already reached or coins are insufficient
-        elif item == "life_duration_increase":
+        if item == "life_duration_increase":
             # Implement logic for increasing life duration
-            self.life_duration += 10000  # Increase life duration by 10 seconds
+            if self.shield.coins >= 10: 
+                self.shield.coins -= 10
+                self.life_duration += 10000  # Increase life duration by 10 seconds
             return True  # Return True if item was successfully purchased
-        elif item == "mob_speed_potation":
-            self.increase_mob_speed_potation()  # Call the method to increase mob speed
-            return True
-        elif item == "player_speed_potation":
-            self.increase_player_speed_potation()  # Call the method to increase player speed
-            return True
+        if item == "mob_speed_potion":
+            if self.shield.coins >= 10: 
+                self.increase_mob_speed_potation()
+                self.shield.coins -= 10
+                return True  # Return True if item was successfully purchased
+            else:
+                return False  # Return False if coins are insufficient
+        if item == "player_speed_potion":
+            if self.shield.coins >= 10: 
+                self.increase_player_speed_potation()
+                self.shield.coins -= 10
+                return True  # Return True if item was successfully purchased
+            else:
+                return False  # Return False if coins are insufficient
         else:
-            # Handle other items or invalid item names
-            return False  # Return False if item purchase failed or invalid item named
+            return False  # Return False if the item is not recognized
 
 
         
@@ -193,12 +205,16 @@ class Game:
     def increase_mob_speed_potation(self):
         # Implement the second random event here
         global ENEMY_SPEED
-        ENEMY_SPEED = 25
+        print(ENEMY_SPEED)
+        ENEMY_SPEED += 75
+        print(ENEMY_SPEED)
 
     def increase_player_speed_potation(self):
         # Implement the second random event here
         global PLAYER_SPEED
-        PLAYER_SPEED = 500
+        print(PLAYER_SPEED)
+        PLAYER_SPEED += 600
+        print(PLAYER_SPEED)
 
 
     def save_player_data(self):
@@ -241,19 +257,6 @@ class Game:
                 self.shield.life -= 10
                 self.life_timer.start_timer(self.life_duration)
                 self.timer.start_timer(LEVEL_DURATION)
-        if self.purchase_item("life_increase"):
-            # Check if player hasn't reached the max life already
-            self.shield.life += 1
-            if self.shield.life > self.shield.max_life:  # Access max_life from Shield object
-                self.shield.life = self.shield.max_life
-        if self.purchase_item("life_duration_increase"):
-            self.life_duration += 10000
-        if self.purchase_item("mob_speed_potation"):
-            global ENEMY_SPEED
-            ENEMY_SPEED = 30
-        if self.purchase_item("player_speed_potation"):
-            global PLAYER_SPEED
-            PLAYER_SPEED = 500
 
 
     def draw_grid(self):

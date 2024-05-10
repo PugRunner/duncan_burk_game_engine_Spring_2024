@@ -43,8 +43,8 @@ class Shield(pg.sprite.Sprite):
             self.x = x * TILESIZE
             self.y = y * TILESIZE
             self.moneybag = 0
-            self.speed = 200
-            self.hitpoints = 100
+            self.speed = PLAYER_SPEED
+            self.hitpoints = 10
             self.gem = 1
             self.death = 0
             self.life = 10
@@ -52,6 +52,10 @@ class Shield(pg.sprite.Sprite):
             self.coins = 99
             self.max_life = 10  # Initial maximum life
             self.life = self.max_life  # Set current life to maximum initially
+
+    def update_speed(self):
+        self.speed += 600
+        self.speed = PLAYER_SPEED
 
     
     def respawn(self):
@@ -178,9 +182,9 @@ class Shield(pg.sprite.Sprite):
                     # self.x *BIGTILESIZE
                     # self.y *BIGTILESIZE
         if self.collide_with_group(self.game.mobs, True):
-            self.quit
+            pass
         if self.collide_with_group(self.game.sideways, True):
-            self.quit
+            pass
         if self.life > self.max_life:
             self.life = self.max_life
         
@@ -275,10 +279,13 @@ class Mob(pg.sprite.Sprite):
             self.vy *= -1
             self.image = pg.transform.rotate(self.image, -180)
 
+    def update_speed(self):
+        self.vy += 75
+        self.vy = ENEMY_SPEED
+
 
     
 # Up down mob
-            # Thx chatgpt for making hitbox a circle
 class Sideway(pg.sprite.Sprite):
     def __init__(self, game, x, y):
         super().__init__(game.all_sprites, game.sideways)
@@ -296,6 +303,9 @@ class Sideway(pg.sprite.Sprite):
             self.vx *= -1
             self.image = pg.transform.rotate(self.image, 180)
 
+    def update_speed(self):
+        self.vx += 75
+        self.vx = ENEMY_SPEED
 
 class Timer():
     # sets all properties to zero when instantiated...
@@ -326,65 +336,27 @@ class ShieldTimer(Timer):
     def __init__(self):
         super().__init__()
 
+# Class moditfy from chatgpt
 class Shop:
     def __init__(self, game):
         self.game = game
-        self.screen = pg.display.set_mode((WIDTH, HEIGHT))
-        # Add other attributes and items for sale as needed
-    
-    def draw_text(self, surface, text, size, color, x, y):
-        font_name = pg.font.match_font('arial')
-        font = pg.font.Font(font_name, size)
-        text_surface = font.render(text, True, color)
-        text_rect = text_surface.get_rect()
-        text_rect.topleft = (x, y)
-        surface.blit(text_surface, text_rect)
+        self.available_potions = []
 
-    def shop_items(self, item):
-        random_events = [
-            self.increase_life_item,
-            self.increase_life_duration_item 
-            # Add more random events as needed
-        ]
-        # Choose a random event from the list and execute it
-        random_event = random.choice(random_events)
-        random_event()  # Call the chosen method
-    
-    def increase_life_item(self):
-            self.game.shield.max_life += 1
-            print("Life increased by 1")
+    def random_potions(self):
+        potion_types = ["life_increase", "life_duration_increase", "mob_speed_potion", "player_speed_potion"]
+        # Randomly select three potions
+        self.available_potions = random.sample(potion_types, 3)
 
-    def increase_life_duration_item(self):
-        # Implement the second random event here
-        self.game.life_duration += 10000
-        print("Time is now 30 seconds longer")
-
-    def increase_mob_speed_potation(self):
-        # Implement the second random event here
-        global ENEMY_SPEED
-        ENEMY_SPEED = 25
-
-    def increase_player_speed_potation(self):
-        # Implement the second random event here
-        global PLAYER_SPEED
-        PLAYER_SPEED = 500
-    
-    
-    def draw(self):
-        self.screen.fill(BGCOLOR)
-        self.draw_text(self.screen, "Welcome to the Shop!", 64, WHITE, 100, 100)
-        self.draw_text(self.screen, "Press 1 to purchase life increase item", 32, WHITE, 100, 200)
-        self.draw_text(self.screen, "Press 2 to purchase life duration increase item", 32, WHITE, 100, 250)
-        self.draw_text(self.screen, "Press 3 to purchase mob speed increase item", 32, WHITE, 100, 300)
-        self.draw_text(self.screen, "Press 4 to purchase player speed increase item", 32, WHITE, 100, 350)
-        # Add more items and descriptions as needed
-        pg.display.flip()
-    
     def show_shop_screen(self):
-        self.draw()  # Draw the shop screen
-        self.wait_for_key()  # Wait for key press
+        self.random_potions()  # Regenerate available potions
+        self.game.screen.fill(BGCOLOR)
+        self.game.draw_text(self.game.screen, "Shop", 64, WHITE, 8, 1)
+        for i, potion in enumerate(self.available_potions):
+            self.game.draw_text(self.game.screen, f"{i+1}. {potion.replace('_', ' ').title()}", 32, WHITE, 1, 3+i)
+        self.game.draw_text(self.game.screen, "Press 1, 2, or 3 to buy, or any key to continue", 32, WHITE, 1, 6)
+        pg.display.flip()
+        self.wait_for_key()
 
-    # def what wait for key is and what actions to take
     def wait_for_key(self):
         waiting = True
         while waiting:
@@ -394,20 +366,18 @@ class Shop:
                     waiting = False
                     self.game.quit()
                 if event.type == pg.KEYDOWN:
-                    if event.key == pg.K_1:
-                        self.purchase_item("life_increase")  # Placeholder, implement logic
-                        self.game.shield.life += 1
-                    elif event.key == pg.K_2:
-                        self.purchase_item("life_duration_increase")  # Placeholder, implement logic
-                    elif event.key == pg.K_3:
-                        self.purchase_item("mob_speed_potation")  # Placeholder, implement logic
-                    elif event.key == pg.K_4:
-                        self.purchase_item("player_speed_potation")  # Placeholder, implement logic
-                    waiting = False
-                if event.type == pg.MOUSEBUTTONDOWN:
-                    self.draw_text(self.screen, "Clicking is NOT pressing a BUTTON", 64, RED, 3, 13)
-                    pg.display.flip()
-    
+                    if event.key in [pg.K_1, pg.K_2, pg.K_3]:
+                        potion_index = event.key - pg.K_1
+                        if potion_index < len(self.available_potions):
+                            potion = self.available_potions[potion_index]
+                            if self.game.purchase_item(potion):
+                                print(f"Bought {potion}")
+                                # Remove the bought potion from available potions
+                                self.available_potions.pop(potion_index)
+                            waiting = False  # Exit the loop after a successful purchase
+                    else:
+                        waiting = False
+
     def purchase_item(self, item):
         # Logic for purchasing items
         if item == "life_increase":
@@ -424,14 +394,19 @@ class Shop:
             # Implement logic for increasing life duration
             self.game.life_duration += 10000  # Increase life duration by 10 seconds
             return True  # Return True if item was successfully purchased
-        elif item == "mob_speed_potation":
-            self.increase_mob_speed_potation()  # Call the method to increase mob speed
+        elif item == "mob_speed_potion":
+            global ENEMY_SPEED
+            ENEMY_SPEED += 75  # Call the method to increase mob speed
+            self.game.enemy.update_speed()
             return True
-        elif item == "player_speed_potation":
-            self.increase_player_speed_potation()  # Call the method to increase player speed
+        elif item == "player_speed_potion":
+            global PLAYER_SPEED
+            PLAYER_SPEED += 600  # Call the method to increase player speed
+            self.game.shield.update_speed()
             return True
         else:
             # Handle other items or invalid item names
             return False  # Return False if item purchase failed or invalid item named
 
-
+        
+    
