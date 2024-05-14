@@ -31,6 +31,7 @@ class Spritesheet:
 # player shield class
 class Shield(pg.sprite.Sprite):
     def __init__(self, game, x, y):
+            super().__init__()
             self.groups = game.all_sprites
             # init super class
             pg.sprite.Sprite.__init__(self, self.groups)
@@ -52,9 +53,10 @@ class Shield(pg.sprite.Sprite):
             self.coins = 99
             self.max_life = 10  # Initial maximum life
             self.life = self.max_life  # Set current life to maximum initially
+            self.invincible = False  # Flag to indicate if the player is invincible
+            self.invincible_timer = 0  # Timer to track the duration of invincibility
 
     def update_speed(self):
-        self.speed += 600
         self.speed = PLAYER_SPEED
 
     
@@ -187,6 +189,16 @@ class Shield(pg.sprite.Sprite):
             pass
         if self.life > self.max_life:
             self.life = self.max_life
+        if self.collide_with_group(self.game.mobs, True):  # Check collision with mobs
+            if not self.invincible:  # If not invincible, lose a life and become invincible
+                self.life -= 1
+                self.death += 1
+                self.invincible = True  # Set invincible to True
+                self.invincible_timer = pg.time.get_ticks()  # Set the start time of invincibility
+
+        # Check if invincibility timer has expired
+        if self.invincible and pg.time.get_ticks() - self.invincible_timer > INVINCIBLE_DURATION:
+            self.invincible = False  # Reset invincibility after the duration expires
         
 
                     
@@ -280,7 +292,6 @@ class Mob(pg.sprite.Sprite):
             self.image = pg.transform.rotate(self.image, -180)
 
     def update_speed(self):
-        self.vy += 75
         self.vy = ENEMY_SPEED
 
 
@@ -304,7 +315,6 @@ class Sideway(pg.sprite.Sprite):
             self.image = pg.transform.rotate(self.image, 180)
 
     def update_speed(self):
-        self.vx += 75
         self.vx = ENEMY_SPEED
 
 class Timer():
@@ -340,6 +350,8 @@ class ShieldTimer(Timer):
 class Shop:
     def __init__(self, game):
         self.game = game
+        self.shield = game.shield
+        self.mob = game.mobs
         self.available_potions = []
 
     def random_potions(self):
@@ -353,9 +365,14 @@ class Shop:
         self.game.draw_text(self.game.screen, "Shop", 64, WHITE, 8, 1)
         for i, potion in enumerate(self.available_potions):
             self.game.draw_text(self.game.screen, f"{i+1}. {potion.replace('_', ' ').title()}", 32, WHITE, 1, 3+i)
+        # Check if there is a second potion available
+        if len(self.available_potions) >= 2:
+            # Display the second potion
+            self.game.draw_text(self.game.screen, f"{len(self.available_potions)+1}. {self.available_potions[1].replace('_', ' ').title()}", 32, WHITE, 1, 5)
         self.game.draw_text(self.game.screen, "Press 1, 2, or 3 to buy, or any key to continue", 32, WHITE, 1, 6)
         pg.display.flip()
         self.wait_for_key()
+
 
     def wait_for_key(self):
         waiting = True
@@ -374,9 +391,27 @@ class Shop:
                                 print(f"Bought {potion}")
                                 # Remove the bought potion from available potions
                                 self.available_potions.pop(potion_index)
-                            waiting = False  # Exit the loop after a successful purchase
+                                # Wait for the second key press
+                                waiting_for_second_key = True
+                                while waiting_for_second_key:
+                                    for second_event in pg.event.get():
+                                        if second_event.type == pg.KEYDOWN:
+                                            if second_event.key in [pg.K_1, pg.K_2, pg.K_3]:
+                                                second_potion_index = second_event.key - pg.K_1
+                                                if second_potion_index < len(self.available_potions):
+                                                    second_potion = self.available_potions[second_potion_index]
+                                                    if self.game.purchase_item(second_potion):
+                                                        print(f"Bought {second_potion}")
+                                                        # Remove the second bought potion from available potions
+                                                        self.available_potions.pop(second_potion_index)
+                                                    waiting_for_second_key = False  # Exit the loop after a successful purchase
+                                                else:
+                                                    waiting_for_second_key = False
+                                            else:
+                                                waiting_for_second_key = False
                     else:
                         waiting = False
+
 
     def purchase_item(self, item):
         # Logic for purchasing items
@@ -396,17 +431,20 @@ class Shop:
             return True  # Return True if item was successfully purchased
         elif item == "mob_speed_potion":
             global ENEMY_SPEED
-            ENEMY_SPEED += 75  # Call the method to increase mob speed
-            self.game.enemy.update_speed()
+            ENEMY_SPEED += 750  # Call the method to increase mob speed
+            self.mob.update_speed()
             return True
         elif item == "player_speed_potion":
-            global PLAYER_SPEED
-            PLAYER_SPEED += 600  # Call the method to increase player speed
-            self.game.shield.update_speed()
-            return True
+            if self.game.shield.coins >= 10:
+                global PLAYER_SPEED
+                PLAYER_SPEED += 6000  # Call the method to increase player speed
+                self.shield.update_speed()
+                return True
+            else:
+                return False  # Return False if coins are insufficient
         else:
-            # Handle other items or invalid item names
             return False  # Return False if item purchase failed or invalid item named
+
 
         
     

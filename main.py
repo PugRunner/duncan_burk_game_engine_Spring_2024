@@ -184,15 +184,20 @@ class Game:
             return True  # Return True if item was successfully purchased
         if item == "mob_speed_potion":
             if self.shield.coins >= 10: 
-                self.increase_mob_speed_potation()
-                self.shield.coins -= 10
+                # Implement the second random event here
+                global ENEMY_SPEED
+                print(ENEMY_SPEED)
+                ENEMY_SPEED = 100
+                print(ENEMY_SPEED)
                 return True  # Return True if item was successfully purchased
             else:
                 return False  # Return False if coins are insufficient
         if item == "player_speed_potion":
             if self.shield.coins >= 10: 
-                self.increase_player_speed_potation()
-                self.shield.coins -= 10
+                global PLAYER_SPEED
+                print(PLAYER_SPEED)
+                PLAYER_SPEED == 1000
+                print(PLAYER_SPEED)
                 return True  # Return True if item was successfully purchased
             else:
                 return False  # Return False if coins are insufficient
@@ -200,21 +205,6 @@ class Game:
             return False  # Return False if the item is not recognized
 
 
-        
-        
-    def increase_mob_speed_potation(self):
-        # Implement the second random event here
-        global ENEMY_SPEED
-        print(ENEMY_SPEED)
-        ENEMY_SPEED += 75
-        print(ENEMY_SPEED)
-
-    def increase_player_speed_potation(self):
-        # Implement the second random event here
-        global PLAYER_SPEED
-        print(PLAYER_SPEED)
-        PLAYER_SPEED += 600
-        print(PLAYER_SPEED)
 
 
     def save_player_data(self):
@@ -257,7 +247,7 @@ class Game:
                 self.shield.life -= 10
                 self.life_timer.start_timer(self.life_duration)
                 self.timer.start_timer(LEVEL_DURATION)
-
+    
 
     def draw_grid(self):
         pass
