@@ -50,7 +50,7 @@ class Shield(pg.sprite.Sprite):
             self.death = 0
             self.life = 10
             self.end = 0
-            self.coins = 99
+            self.coins = 0
             self.max_life = 10  # Initial maximum life
             self.life = self.max_life  # Set current life to maximum initially
             self.invincible = False  # Flag to indicate if the player is invincible
@@ -346,7 +346,7 @@ class ShieldTimer(Timer):
     def __init__(self):
         super().__init__()
 
-# Class moditfy from chatgpt
+
 class Shop:
     def __init__(self, game):
         self.game = game
@@ -362,17 +362,21 @@ class Shop:
     def show_shop_screen(self):
         self.random_potions()  # Regenerate available potions
         self.game.screen.fill(BGCOLOR)
-        self.game.draw_text(self.game.screen, "Shop", 64, WHITE, 8, 1)
+        # Drawing the shop title
+        self.game.draw_text(self.game.screen, "Shop", 64, WHITE, 32, 2)
+        
+        # Vertical position offset for the potions
+        start_y = 2
+        line_height = 2  # Height between each line of text
+
         for i, potion in enumerate(self.available_potions):
-            self.game.draw_text(self.game.screen, f"{i+1}. {potion.replace('_', ' ').title()}", 32, WHITE, 1, 3+i)
-        # Check if there is a second potion available
-        if len(self.available_potions) >= 2:
-            # Display the second potion
-            self.game.draw_text(self.game.screen, f"{len(self.available_potions)+1}. {self.available_potions[1].replace('_', ' ').title()}", 32, WHITE, 1, 5)
-        self.game.draw_text(self.game.screen, "Press 1, 2, or 3 to buy, or any key to continue", 32, WHITE, 1, 6)
+            self.game.draw_text(self.game.screen, f"{i+1}. {potion.replace('_', ' ').title()}", 32, WHITE, 2, start_y + i * line_height)
+
+        # Instructions for the player
+        self.game.draw_text(self.game.screen, "Press 1, 2, or 3 to buy a potion pair, or any key to exit", 32, WHITE, 32, start_y + (len(self.available_potions) + 1) * line_height)
+
         pg.display.flip()
         self.wait_for_key()
-
 
     def wait_for_key(self):
         waiting = True
@@ -386,65 +390,49 @@ class Shop:
                     if event.key in [pg.K_1, pg.K_2, pg.K_3]:
                         potion_index = event.key - pg.K_1
                         if potion_index < len(self.available_potions):
-                            potion = self.available_potions[potion_index]
-                            if self.game.purchase_item(potion):
-                                print(f"Bought {potion}")
-                                # Remove the bought potion from available potions
-                                self.available_potions.pop(potion_index)
-                                # Wait for the second key press
-                                waiting_for_second_key = True
-                                while waiting_for_second_key:
-                                    for second_event in pg.event.get():
-                                        if second_event.type == pg.KEYDOWN:
-                                            if second_event.key in [pg.K_1, pg.K_2, pg.K_3]:
-                                                second_potion_index = second_event.key - pg.K_1
-                                                if second_potion_index < len(self.available_potions):
-                                                    second_potion = self.available_potions[second_potion_index]
-                                                    if self.game.purchase_item(second_potion):
-                                                        print(f"Bought {second_potion}")
-                                                        # Remove the second bought potion from available potions
-                                                        self.available_potions.pop(second_potion_index)
-                                                    waiting_for_second_key = False  # Exit the loop after a successful purchase
-                                                else:
-                                                    waiting_for_second_key = False
-                                            else:
-                                                waiting_for_second_key = False
+                            self.handle_purchase(potion_index)
+                            waiting = False
                     else:
                         waiting = False
 
+    def handle_purchase(self, index):
+        potion = self.available_potions[index]
+        if self.game.purchase_item(potion):
+            print(f"Bought {potion}")
+            self.available_potions.pop(index)  # Remove the purchased potion from the list
+        # After purchasing, transition back to the game
+        self.show_shop_screen = False
 
     def purchase_item(self, item):
-        # Logic for purchasing items
         if item == "life_increase":
             if self.game.shield.coins >= 10: 
                 self.game.shield.max_life += 1
                 self.game.shield.life += 1 
                 self.game.shield.coins -= 10
-                # Save player data after increasing maximum life
                 self.game.save_player_data()
-                return True  # Return True if item was successfully purchased
+                return True
             else:
-                return False  # Return False if max life is already reached or coins are insufficient
+                return False
         elif item == "life_duration_increase":
-            # Implement logic for increasing life duration
-            self.game.life_duration += 10000  # Increase life duration by 10 seconds
-            return True  # Return True if item was successfully purchased
+            if self.game.shield.coins >= 10:
+                self.game.life_duration += 10000
+                self.game.shield.coins -= 10
+                return True
         elif item == "mob_speed_potion":
-            global ENEMY_SPEED
-            ENEMY_SPEED += 750  # Call the method to increase mob speed
-            self.mob.update_speed()
-            return True
+            if self.game.shield.coins >= 10:
+                global ENEMY_SPEED
+                ENEMY_SPEED += 750
+                self.game.shield.coins -= 10
+                self.mob.update_speed()
+                return True
         elif item == "player_speed_potion":
             if self.game.shield.coins >= 10:
                 global PLAYER_SPEED
-                PLAYER_SPEED += 6000  # Call the method to increase player speed
+                PLAYER_SPEED += 6000
+                self.game.shield.coins -= 10
                 self.shield.update_speed()
                 return True
             else:
-                return False  # Return False if coins are insufficient
+                return False
         else:
-            return False  # Return False if item purchase failed or invalid item named
-
-
-        
-    
+            return False

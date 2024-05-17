@@ -159,7 +159,7 @@ class Game:
         self.current_level += 1
 
     def after_level_complete(self):
-        self.shield.coins += 1
+        self.shield.coins += 10
         self.shop.show_shop_screen()
 
     def purchase_item(self, item):
