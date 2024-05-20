@@ -189,6 +189,7 @@ class Shield(pg.sprite.Sprite):
             pass
         if self.life > self.max_life:
             self.life = self.max_life
+        # ChatGPT
         if self.collide_with_group(self.game.mobs, True):  # Check collision with mobs
             if not self.invincible:  # If not invincible, lose a life and become invincible
                 self.life -= 1
@@ -316,7 +317,7 @@ class Sideway(pg.sprite.Sprite):
 
     def update_speed(self):
         self.vx = ENEMY_SPEED
-
+# ChatGPT and Cozort
 class Timer():
     # sets all properties to zero when instantiated...
     def __init__(self, game):
@@ -341,12 +342,12 @@ class Timer():
     # sets current time
     def get_current_time(self):
         self.current_time = floor((pg.time.get_ticks())/1000)
-
+# ChatGPT
 class ShieldTimer(Timer):
     def __init__(self):
         super().__init__()
 
-
+# ChatGPT
 class Shop:
     def __init__(self, game):
         self.game = game

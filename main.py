@@ -16,12 +16,12 @@ from pygame import mixer
 LEVEL1 = "level1.txt"
 LEVEL2 = "level2.txt"
 LEVEL3 = "level3.txt"
-LEVEL4 = "level4.txt"
+LEVEL4 = "leveddl4.txt"
 
 ENEMY_SPEED = 15
 PLAYER_SPEED = 200
 
-
+# ChatGPT
 class Timer:
     def __init__(self, duration_ms=60000):
         self.duration = duration_ms
@@ -59,6 +59,7 @@ class Game:
         self.load_player_data()  # Call load_player_data after shield is initialized
         self.load_data()  # Move load_data method call to after load_player_data
 
+    # ChatGPT
     def load_player_data(self):
         try:
             with open(self.player_data_file, "r") as f:
@@ -68,6 +69,7 @@ class Game:
         except FileNotFoundError:
             print(f"Player data file '{self.player_data_file}' not found.")
 
+    # loads images and sounds
     def load_data(self):
         self.game_folder = path.dirname(__file__)
         self.img_folder = path.join(self.game_folder, 'images')
@@ -81,6 +83,7 @@ class Game:
         with open(path.join(self.game_folder, LEVEL1), 'rt') as f:
             for line in f:
                 self.map_data.append(line)
+        # loads in the different things on the map
     def new(self):
         self.all_sprites = pg.sprite.Group()
         self.walls = pg.sprite.Group()
@@ -116,6 +119,7 @@ class Game:
                 if tile == "U":
                     Sideway(self, col, row)
 
+        # what happenes when the game is run
     def run(self):
         self.playing = True
         while self.playing:
@@ -135,6 +139,7 @@ class Game:
             heartbeat_sound.set_volume(heartbeat_rate)
             heartbeat_sound.play()
             
+            # what happenes after every level
     def change_level(self, lvl):
         for s in self.all_sprites:
             s.kill()
@@ -162,6 +167,7 @@ class Game:
         self.shield.coins += 10
         self.shop.show_shop_screen()
 
+    # Chatgpt
     def purchase_item(self, item):
         # Logic for purchasing items...
         if item == "life_increase":
@@ -206,7 +212,7 @@ class Game:
 
 
 
-
+    # ChatGPT
     def save_player_data(self):
         player_data = {"max_life": self.shield.max_life}
         with open(self.player_data_file, "w") as f:
@@ -252,6 +258,7 @@ class Game:
     def draw_grid(self):
         pass
 
+# draws what you see on the screen
     def draw_text(self, surface, text, size, color, x, y):
         font_name = pg.font.match_font('arial')
         font = pg.font.Font(font_name, size)
@@ -297,7 +304,7 @@ class Game:
         self.draw_text(self.screen, "Press ANY button to start again", 64, RED, 5, 10)
         pg.display.flip()
         self.wait_for_key_death()
-
+# defines the keypressing on each screen
     def wait_for_key(self):
         waiting = True
         while waiting:
